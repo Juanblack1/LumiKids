@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Logo Icon",
+  "createdAt": "2026-03-23T17:59:14.722Z",
+  "aspectRatio": "1:1",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Cute flat mascot logo icon for a children's educational platform called LumiKids, smiling moon combined with open book and tiny star, premium vector-like 2D style, coral aqua and golden palette, centered emblem, clean light background, no text\n\nAvoid: photorealistic, cluttered, watermark, logo text, dark horror, busy background",
+  "basePrompt": "Cute flat mascot logo icon for a children's educational platform called LumiKids, smiling moon combined with open book and tiny star, premium vector-like 2D style, coral aqua and golden palette, centered emblem, clean light background, no text",
+  "negativePrompt": "photorealistic, cluttered, watermark, logo text, dark horror, busy background",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-59-14-716Z-logo-icon-1.png"
+  ]
+}

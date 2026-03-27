@@ -1,0 +1,11 @@
+Title: LumiKids Story Garden
+Aspect ratio: 4:3
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Children's book illustration for an educational kids website, magical moon garden with a smiling child silhouette, glowing seed, warm moonlight, soft pastel sky, playful rounded shapes, joyful and safe mood, clean composition for website card, 2D illustration, no text
+
+Avoid: photorealistic, scary, horror, clutter, watermark, logo, text, dark shadows
+
+Negative prompt:
+photorealistic, scary, horror, clutter, watermark, logo, text, dark shadows

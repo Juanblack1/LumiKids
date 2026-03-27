@@ -1,0 +1,11 @@
+Title: LumiKids Numbers
+Aspect ratio: 4:3
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Playful 2D illustration for a kids numbers learning card, friendly numbers 1 2 3 with stars and rounded blocks, pastel palette, premium children's education style, clean composition, no text beyond decorative numbers
+
+Avoid: photorealistic, scary, cluttered, watermark, logo, words, dark mood
+
+Negative prompt:
+photorealistic, scary, cluttered, watermark, logo, words, dark mood

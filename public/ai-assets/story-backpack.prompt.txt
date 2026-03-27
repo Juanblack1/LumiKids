@@ -1,0 +1,11 @@
+Title: LumiKids Story Backpack
+Aspect ratio: 4:3
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Children's book illustration for an educational kids website, bright orange school backpack with friendly emotion badges floating around it, gentle classroom atmosphere, playful rounded shapes, soft pastel palette, safe and welcoming mood, clean composition for website card, 2D illustration, no text
+
+Avoid: photorealistic, scary, clutter, watermark, logo, text, dark dramatic lighting
+
+Negative prompt:
+photorealistic, scary, clutter, watermark, logo, text, dark dramatic lighting

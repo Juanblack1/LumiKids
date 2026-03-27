@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Tic Tac Toe",
+  "createdAt": "2026-03-23T17:50:20.180Z",
+  "aspectRatio": "4:3",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Playful 2D illustration for an educational kids game card, colorful tic tac toe board with friendly symbols, rounded pieces, safe and cheerful mood, premium children's app style, clean composition, no text\n\nAvoid: photorealistic, scary, cluttered, watermark, logo, text, dark horror",
+  "basePrompt": "Playful 2D illustration for an educational kids game card, colorful tic tac toe board with friendly symbols, rounded pieces, safe and cheerful mood, premium children's app style, clean composition, no text",
+  "negativePrompt": "photorealistic, scary, cluttered, watermark, logo, text, dark horror",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-50-20-170Z-game-tictactoe-1.png"
+  ]
+}

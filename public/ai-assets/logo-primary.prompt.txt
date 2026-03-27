@@ -1,0 +1,11 @@
+Title: LumiKids Logo Icon
+Aspect ratio: 1:1
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Cute flat mascot logo icon for a children's educational platform called LumiKids, smiling moon combined with open book and tiny star, premium vector-like 2D style, coral aqua and golden palette, centered emblem, clean light background, no text
+
+Avoid: photorealistic, cluttered, watermark, logo text, dark horror, busy background
+
+Negative prompt:
+photorealistic, cluttered, watermark, logo text, dark horror, busy background

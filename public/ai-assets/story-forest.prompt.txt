@@ -1,0 +1,11 @@
+Title: LumiKids Story Forest
+Aspect ratio: 4:3
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Children's book illustration for an educational kids website, friendly blue forest with cute otter, toucan and capybara shapes helping each other across a small river, pastel colors, playful rounded composition, safe and optimistic mood, 2D illustration, no text
+
+Avoid: photorealistic, scary, predator violence, clutter, watermark, logo, text, horror
+
+Negative prompt:
+photorealistic, scary, predator violence, clutter, watermark, logo, text, horror

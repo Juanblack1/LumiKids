@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Login",
+  "createdAt": "2026-03-23T17:49:49.072Z",
+  "aspectRatio": "4:3",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Playful 2D illustration for a kids educational login screen, welcoming child avatar and gentle parent helper, friendly backpack, stars and rounded shapes, soft coral and sky palette, safe and calm mood, clean centered composition, no text\n\nAvoid: photorealistic, scary, cluttered, watermark, logo, text, harsh shadows",
+  "basePrompt": "Playful 2D illustration for a kids educational login screen, welcoming child avatar and gentle parent helper, friendly backpack, stars and rounded shapes, soft coral and sky palette, safe and calm mood, clean centered composition, no text",
+  "negativePrompt": "photorealistic, scary, cluttered, watermark, logo, text, harsh shadows",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-49-49-061Z-login-welcome-1.png"
+  ]
+}

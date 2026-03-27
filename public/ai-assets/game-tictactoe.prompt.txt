@@ -1,0 +1,11 @@
+Title: LumiKids Tic Tac Toe
+Aspect ratio: 4:3
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Playful 2D illustration for an educational kids game card, colorful tic tac toe board with friendly symbols, rounded pieces, safe and cheerful mood, premium children's app style, clean composition, no text
+
+Avoid: photorealistic, scary, cluttered, watermark, logo, text, dark horror
+
+Negative prompt:
+photorealistic, scary, cluttered, watermark, logo, text, dark horror

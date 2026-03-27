@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Story Forest",
+  "createdAt": "2026-03-23T17:49:15.959Z",
+  "aspectRatio": "4:3",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Children's book illustration for an educational kids website, friendly blue forest with cute otter, toucan and capybara shapes helping each other across a small river, pastel colors, playful rounded composition, safe and optimistic mood, 2D illustration, no text\n\nAvoid: photorealistic, scary, predator violence, clutter, watermark, logo, text, horror",
+  "basePrompt": "Children's book illustration for an educational kids website, friendly blue forest with cute otter, toucan and capybara shapes helping each other across a small river, pastel colors, playful rounded composition, safe and optimistic mood, 2D illustration, no text",
+  "negativePrompt": "photorealistic, scary, predator violence, clutter, watermark, logo, text, horror",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-49-15-952Z-story-forest-1.png"
+  ]
+}

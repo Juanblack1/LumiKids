@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Printable School Match",
+  "createdAt": "2026-03-23T17:59:49.696Z",
+  "aspectRatio": "4:3",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Playful 2D illustration for a printable kids school activity, matching lines between school objects and places, pencil, stars and rounded cards, pastel classroom palette, premium children's education style, clean composition, no text\n\nAvoid: photorealistic, cluttered, watermark, scary, dark mood, text",
+  "basePrompt": "Playful 2D illustration for a printable kids school activity, matching lines between school objects and places, pencil, stars and rounded cards, pastel classroom palette, premium children's education style, clean composition, no text",
+  "negativePrompt": "photorealistic, cluttered, watermark, scary, dark mood, text",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-59-49-690Z-printable-school-match-1.png"
+  ]
+}

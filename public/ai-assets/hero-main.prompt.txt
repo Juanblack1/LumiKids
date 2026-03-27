@@ -1,0 +1,11 @@
+Title: LumiKids Hero
+Aspect ratio: 4:3
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Playful 2D illustration for a kids educational website hero, colorful learning universe with games, books, stars, crayons and friendly abstract mascots, premium editorial composition, bright pastel palette, safe joyful mood, spacious composition for landing page, no text
+
+Avoid: photorealistic, scary, cluttered, watermark, logo, text, dark mood
+
+Negative prompt:
+photorealistic, scary, cluttered, watermark, logo, text, dark mood

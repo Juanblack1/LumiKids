@@ -1,0 +1,11 @@
+Title: LumiKids Library
+Aspect ratio: 4:3
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Playful 2D illustration for a kids story library section, cozy reading nook with books, moon lamp, pillows and friendly pastel characters, warm inviting mood, premium children's editorial style, clean website card composition, no text
+
+Avoid: photorealistic, scary, cluttered, watermark, logo, text, dark shadows
+
+Negative prompt:
+photorealistic, scary, cluttered, watermark, logo, text, dark shadows

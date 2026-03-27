@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Nunito", sans-serif;
+  --color-ink: #19323c;
+  --color-muted-ink: #5c6b73;
+  --color-coral: #ff8c42;
+  --color-sand: #fff4e7;
+  --color-sky: #5ab6ff;
+  --color-aqua: #33c7c0;
+  --color-sun: #ffd166;
+  --color-mint: #f2fff6;
+  --color-card: #ffffff;
+  --color-cream: #fff8ef;
+  --color-soft-border: #dde7ef;
+}
+
+:root {
+  color: var(--color-ink);
+  background:
+    radial-gradient(circle at top left, rgba(255, 209, 102, 0.45), transparent 24%),
+    radial-gradient(circle at top right, rgba(90, 182, 255, 0.18), transparent 22%),
+    linear-gradient(180deg, #fff9f1 0%, #f7fbff 46%, #ffffff 100%);
+  font-family: var(--font-body);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background: rgba(255, 140, 66, 0.22);
+}
+
+.story-grid {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.catalog-grid {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.game-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.printable-grid {
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-card {
+    border: 1px solid #d8d8d8 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  .print-break {
+    page-break-before: always;
+  }
+}

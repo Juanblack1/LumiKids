@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Printable Fruit Crossword",
+  "createdAt": "2026-03-23T17:59:46.738Z",
+  "aspectRatio": "4:3",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Playful 2D illustration for a printable kids crossword worksheet, fruits icons around a clean puzzle board, cheerful classroom palette, premium children's education style, organized composition, no text\n\nAvoid: photorealistic, cluttered, watermark, scary, dark mood, text",
+  "basePrompt": "Playful 2D illustration for a printable kids crossword worksheet, fruits icons around a clean puzzle board, cheerful classroom palette, premium children's education style, organized composition, no text",
+  "negativePrompt": "photorealistic, cluttered, watermark, scary, dark mood, text",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-59-46-733Z-printable-fruit-crossword-1.png"
+  ]
+}

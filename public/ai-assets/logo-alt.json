@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Logo Icon Alt",
+  "createdAt": "2026-03-23T18:15:46.362Z",
+  "aspectRatio": "1:1",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Alternative mascot logo icon for a children's educational platform called LumiKids, smiling star child hugging an open book crescent, premium vector-like 2D style, warm coral aqua golden palette, centered emblem on clean light background, no text\n\nAvoid: photorealistic, cluttered, watermark, text, dark horror, busy background",
+  "basePrompt": "Alternative mascot logo icon for a children's educational platform called LumiKids, smiling star child hugging an open book crescent, premium vector-like 2D style, warm coral aqua golden palette, centered emblem on clean light background, no text",
+  "negativePrompt": "photorealistic, cluttered, watermark, text, dark horror, busy background",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T18-15-46-355Z-logo-icon-alt-1.png"
+  ]
+}

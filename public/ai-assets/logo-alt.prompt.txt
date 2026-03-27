@@ -1,0 +1,11 @@
+Title: LumiKids Logo Icon Alt
+Aspect ratio: 1:1
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Alternative mascot logo icon for a children's educational platform called LumiKids, smiling star child hugging an open book crescent, premium vector-like 2D style, warm coral aqua golden palette, centered emblem on clean light background, no text
+
+Avoid: photorealistic, cluttered, watermark, text, dark horror, busy background
+
+Negative prompt:
+photorealistic, cluttered, watermark, text, dark horror, busy background

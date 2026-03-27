@@ -1,0 +1,11 @@
+Title: LumiKids Printable Fruit Crossword
+Aspect ratio: 4:3
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Playful 2D illustration for a printable kids crossword worksheet, fruits icons around a clean puzzle board, cheerful classroom palette, premium children's education style, organized composition, no text
+
+Avoid: photorealistic, cluttered, watermark, scary, dark mood, text
+
+Negative prompt:
+photorealistic, cluttered, watermark, scary, dark mood, text

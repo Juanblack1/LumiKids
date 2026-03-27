@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Story Library Treasure",
+  "createdAt": "2026-03-23T17:59:16.031Z",
+  "aspectRatio": "4:3",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Children's book illustration for a kids educational website, magical library treasure hunt with map, bookshelves, golden clues and three happy children silhouettes, warm inviting mood, premium 2D editorial style, clean composition, no text\n\nAvoid: photorealistic, scary, cluttered, watermark, text, dark thriller",
+  "basePrompt": "Children's book illustration for a kids educational website, magical library treasure hunt with map, bookshelves, golden clues and three happy children silhouettes, warm inviting mood, premium 2D editorial style, clean composition, no text",
+  "negativePrompt": "photorealistic, scary, cluttered, watermark, text, dark thriller",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-59-16-019Z-story-library-treasure-1.png"
+  ]
+}

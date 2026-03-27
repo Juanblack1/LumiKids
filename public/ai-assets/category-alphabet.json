@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Alphabet",
+  "createdAt": "2026-03-23T17:50:59.466Z",
+  "aspectRatio": "4:3",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Playful 2D illustration for a kids alphabet learning card, cheerful letters A B C with friendly eyes, crayons and soft shapes, pastel palette, premium children's education style, clean composition, no text beyond decorative letters\n\nAvoid: photorealistic, scary, cluttered, watermark, logo, words, dark mood",
+  "basePrompt": "Playful 2D illustration for a kids alphabet learning card, cheerful letters A B C with friendly eyes, crayons and soft shapes, pastel palette, premium children's education style, clean composition, no text beyond decorative letters",
+  "negativePrompt": "photorealistic, scary, cluttered, watermark, logo, words, dark mood",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-50-59-460Z-category-alphabet-1.png"
+  ]
+}

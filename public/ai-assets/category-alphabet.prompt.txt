@@ -1,0 +1,11 @@
+Title: LumiKids Alphabet
+Aspect ratio: 4:3
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Playful 2D illustration for a kids alphabet learning card, cheerful letters A B C with friendly eyes, crayons and soft shapes, pastel palette, premium children's education style, clean composition, no text beyond decorative letters
+
+Avoid: photorealistic, scary, cluttered, watermark, logo, words, dark mood
+
+Negative prompt:
+photorealistic, scary, cluttered, watermark, logo, words, dark mood

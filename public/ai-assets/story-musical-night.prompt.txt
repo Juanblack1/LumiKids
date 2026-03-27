@@ -1,0 +1,11 @@
+Title: LumiKids Story Musical Night
+Aspect ratio: 4:3
+Image model: imagen-4.0-generate-001
+
+Prompt:
+Children's book illustration for a kids educational website, gentle musical night scene with singing stars, moonlit village, dreamy pastel blue palette, cozy bedtime mood, premium 2D editorial style, clean composition, no text
+
+Avoid: photorealistic, scary, cluttered, watermark, text, horror
+
+Negative prompt:
+photorealistic, scary, cluttered, watermark, text, horror

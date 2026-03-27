@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Story Garden",
+  "createdAt": "2026-03-23T17:49:15.604Z",
+  "aspectRatio": "4:3",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Children's book illustration for an educational kids website, magical moon garden with a smiling child silhouette, glowing seed, warm moonlight, soft pastel sky, playful rounded shapes, joyful and safe mood, clean composition for website card, 2D illustration, no text\n\nAvoid: photorealistic, scary, horror, clutter, watermark, logo, text, dark shadows",
+  "basePrompt": "Children's book illustration for an educational kids website, magical moon garden with a smiling child silhouette, glowing seed, warm moonlight, soft pastel sky, playful rounded shapes, joyful and safe mood, clean composition for website card, 2D illustration, no text",
+  "negativePrompt": "photorealistic, scary, horror, clutter, watermark, logo, text, dark shadows",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-49-15-591Z-story-garden-1.png"
+  ]
+}

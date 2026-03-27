@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Story Giraffe Counting",
+  "createdAt": "2026-03-23T17:59:16.206Z",
+  "aspectRatio": "4:3",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Children's book illustration for a kids educational website, friendly giraffe counting colorful dots and leaves in a sunny savanna, playful numbers mood, premium 2D editorial style, clean composition, no text\n\nAvoid: photorealistic, scary, cluttered, watermark, text, dark shadows",
+  "basePrompt": "Children's book illustration for a kids educational website, friendly giraffe counting colorful dots and leaves in a sunny savanna, playful numbers mood, premium 2D editorial style, clean composition, no text",
+  "negativePrompt": "photorealistic, scary, cluttered, watermark, text, dark shadows",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-59-16-199Z-story-giraffe-counting-1.png"
+  ]
+}

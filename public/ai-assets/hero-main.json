@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Hero",
+  "createdAt": "2026-03-23T17:49:51.198Z",
+  "aspectRatio": "4:3",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Playful 2D illustration for a kids educational website hero, colorful learning universe with games, books, stars, crayons and friendly abstract mascots, premium editorial composition, bright pastel palette, safe joyful mood, spacious composition for landing page, no text\n\nAvoid: photorealistic, scary, cluttered, watermark, logo, text, dark mood",
+  "basePrompt": "Playful 2D illustration for a kids educational website hero, colorful learning universe with games, books, stars, crayons and friendly abstract mascots, premium editorial composition, bright pastel palette, safe joyful mood, spacious composition for landing page, no text",
+  "negativePrompt": "photorealistic, scary, cluttered, watermark, logo, text, dark mood",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-49-51-188Z-hero-main-1.png"
+  ]
+}

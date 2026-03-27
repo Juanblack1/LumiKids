@@ -1,0 +1,16 @@
+{
+  "title": "LumiKids Library",
+  "createdAt": "2026-03-23T17:49:48.666Z",
+  "aspectRatio": "4:3",
+  "chatModel": null,
+  "imageModel": "imagen-4.0-generate-001",
+  "creativeKitPath": null,
+  "promptFilePath": null,
+  "prompt": "Playful 2D illustration for a kids story library section, cozy reading nook with books, moon lamp, pillows and friendly pastel characters, warm inviting mood, premium children's editorial style, clean website card composition, no text\n\nAvoid: photorealistic, scary, cluttered, watermark, logo, text, dark shadows",
+  "basePrompt": "Playful 2D illustration for a kids story library section, cozy reading nook with books, moon lamp, pillows and friendly pastel characters, warm inviting mood, premium children's editorial style, clean website card composition, no text",
+  "negativePrompt": "photorealistic, scary, cluttered, watermark, logo, text, dark shadows",
+  "rationale": "",
+  "outputFiles": [
+    "C:\\Users\\veron\\OneDrive\\Área de Trabalho\\MeuSquadProtagonista\\Projetos\\Site para crianças\\frontend\\public\\ai-assets\\2026-03-23T17-49-48-658Z-story-library-1.png"
+  ]
+}
