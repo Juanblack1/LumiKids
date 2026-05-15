@@ -37,6 +37,7 @@ export interface SessionPayload {
   user: SessionUser | null
   favorites: FavoriteRecord[]
   progress: ProgressRecord[]
+  csrfToken?: string
 }
 
 export interface CatalogCategory {
