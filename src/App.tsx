@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   BookHeart,
   BookOpen,
@@ -227,25 +227,25 @@ function AppProvider({ children }: { children: ReactNode }) {
     [session.progress],
   )
 
-  const loginAction = async (input: { email: string; password: string; role: string }) => {
+  const loginAction = useCallback(async (input: { email: string; password: string; role: string }) => {
     try {
       const nextSession = await login(input)
       setSession(nextSession)
-      toast.success(`Ola, ${nextSession.user?.name ?? 'visitante'}!`) 
+      toast.success(`Ola, ${nextSession.user?.name ?? 'visitante'}!`)
       return true
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Nao foi possivel entrar.')
       return false
     }
-  }
+  }, [])
 
-  const logoutAction = async () => {
+  const logoutAction = useCallback(async () => {
     await logout()
     setSession(emptySession)
     toast.success('Sessao encerrada com seguranca.')
-  }
+  }, [])
 
-  const toggleFavoriteAction = async (itemKind: FavoriteKind, itemSlug: string) => {
+  const toggleFavoriteAction = useCallback(async (itemKind: FavoriteKind, itemSlug: string) => {
     if (!session.user) {
       toast.message('Entre com um perfil para salvar favoritos.')
       return
@@ -257,7 +257,7 @@ function AppProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Nao foi possivel atualizar favoritos.')
     }
-  }
+  }, [session.user])
 
   const recordProgressAction = useCallback(async (input: {
     itemKind: ProgressRecord['itemKind']
@@ -296,7 +296,7 @@ function AppProvider({ children }: { children: ReactNode }) {
       toggleFavoriteAction,
       recordProgressAction,
     }),
-    [categories, favoriteSet, games, loading, printables, progressMap, session, stories],
+    [categories, favoriteSet, games, loading, loginAction, logoutAction, printables, progressMap, recordProgressAction, session, stories, toggleFavoriteAction],
   )
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>
@@ -999,6 +999,7 @@ function LoginPage() {
     child: { email: 'luna@lumikids.com', password: '123456' },
     guardian: { email: 'familia@lumikids.com', password: '123456' },
   }
+  const selectedDemo = demoMap[role]
 
   return (
     <AppShell>
@@ -1091,10 +1092,18 @@ function LoginPage() {
               </div>
 
               <div className="flex items-center justify-between gap-3 text-sm font-bold">
-                <button type="button" className="text-aqua">
+                <button
+                  type="button"
+                  className="text-aqua"
+                  onClick={() => toast.message('Ambiente demo: use a senha 123456 para testar agora.')}
+                >
                   Esqueci minha senha
                 </button>
-                <button type="button" className="text-muted-ink">
+                <button
+                  type="button"
+                  className="text-muted-ink"
+                  onClick={() => toast.message(`Conta demo: ${selectedDemo.email} / ${selectedDemo.password}`)}
+                >
                   Lembrete de acesso
                 </button>
               </div>
@@ -1106,7 +1115,13 @@ function LoginPage() {
                 <Button className="w-full" size="lg" variant="dark" type="button" onClick={() => navigate('/catalog')}>
                   Continuar como visitante
                 </Button>
-                <Button className="w-full" size="lg" variant="secondary" type="button">
+                <Button
+                  className="w-full"
+                  size="lg"
+                  variant="secondary"
+                  type="button"
+                  onClick={() => toast.message('Cadastro real em breve. Para testar tudo hoje, use um dos perfis demo acima.')}
+                >
                   Criar conta
                 </Button>
               </div>
@@ -1247,25 +1262,33 @@ function GameDetailPage() {
   const { slug } = useParams()
   const { games, progressMap, recordProgressAction, loading } = useAppData()
   const game = games.find((entry) => entry.slug === slug)
+  const gameSlug = game?.slug
   const gameImage = game ? gameArtMap[game.slug] ?? '/ai-assets/game-tictactoe.png' : '/ai-assets/game-tictactoe.png'
   const progress = game ? progressMap.get(`game:${game.slug}`) : undefined
+  const recordedGameSlugRef = useRef<string | null>(null)
+  const progressStatus = progress?.status
+  const progressBestScore = progress?.bestScore
+  const progressPhase = progress?.currentPhase
+  const progressLevel = progress?.currentLevel
+  const progressMaxLevel = progress?.maxLevel
 
   useEffect(() => {
-    if (!game) return
+    if (!gameSlug || recordedGameSlugRef.current === gameSlug) return
+    recordedGameSlugRef.current = gameSlug
 
     void recordProgressAction({
       itemKind: 'game',
-      itemSlug: game.slug,
-      status: progress?.status === 'completed' ? 'completed' : 'started',
-      score: progress?.bestScore ?? 0,
-      currentPhase: progress?.currentPhase ?? 'opened',
-      currentLevel: progress?.currentLevel ?? 1,
-      maxLevel: progress?.maxLevel ?? 1,
+      itemSlug: gameSlug,
+      status: progressStatus === 'completed' ? 'completed' : 'started',
+      score: progressBestScore ?? 0,
+      currentPhase: progressPhase ?? 'opened',
+      currentLevel: progressLevel ?? 1,
+      maxLevel: progressMaxLevel ?? 1,
       meta: { source: 'detail-page' },
     })
-  }, [game?.slug])
+  }, [gameSlug, progressBestScore, progressLevel, progressMaxLevel, progressPhase, progressStatus, recordProgressAction])
 
-  const handleGameProgress = useCallback((payload: {
+  const handleGameProgress = (payload: {
     status: ProgressRecord['status']
     score: number
     currentPhase?: string
@@ -1275,10 +1298,10 @@ function GameDetailPage() {
     successDelta?: number
     meta?: Record<string, unknown>
   }) => {
-    if (!game) return
+    if (!gameSlug) return
 
-    void recordProgressAction({ itemKind: 'game', itemSlug: game.slug, ...payload })
-  }, [game?.slug, recordProgressAction])
+    void recordProgressAction({ itemKind: 'game', itemSlug: gameSlug, ...payload })
+  }
 
   if (loading) {
     return <LoadingPage label="Abrindo o jogo..." />

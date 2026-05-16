@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { RefreshCw, Sparkles, Star, Trophy, WandSparkles } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,8 @@ type MiniGameProps = {
 }
 
 type WorksheetSlug = 'caca-palavras-da-fazenda' | 'labirinto-do-foguete' | 'ligue-os-pontos-do-dragao'
+const FARM_WORDS = ['VACA', 'GATO', 'PATO', 'OVELHA', 'MILHO', 'TRATOR']
+const CONNECT_DOT_POINTS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
 
 function shuffle<T>(items: T[]) {
   return [...items].sort(() => Math.random() - 0.5)
@@ -54,6 +56,9 @@ export function TicTacToeGame({ onComplete, onProgress }: MiniGameProps) {
   const [winner, setWinner] = useState<string | null>(null)
   const [winningCells, setWinningCells] = useState<number[]>([])
   const [roundScore, setRoundScore] = useState({ child: 0, luna: 0, draws: 0 })
+  const reportProgress = useEffectEvent((payload: ProgressPayload) => {
+    onProgress?.(payload)
+  })
 
   const lines = [
     [0, 1, 2],
@@ -67,8 +72,8 @@ export function TicTacToeGame({ onComplete, onProgress }: MiniGameProps) {
   ]
 
   useEffect(() => {
-    onProgress?.({ status: 'started', score: 0, currentPhase: 'match-start', currentLevel: 1, maxLevel: 1, attemptDelta: 1 })
-  }, [onProgress])
+    reportProgress({ status: 'started', score: 0, currentPhase: 'match-start', currentLevel: 1, maxLevel: 1, attemptDelta: 1 })
+  }, [])
 
   const checkWinner = (nextBoard: string[]) => {
     for (const line of lines) {
@@ -134,7 +139,7 @@ export function TicTacToeGame({ onComplete, onProgress }: MiniGameProps) {
 
     const available = next.map((value, idx) => (value ? null : idx)).filter((value): value is number => value !== null)
     const center = available.includes(4) ? 4 : null
-    const rivalIndex = center ?? available[Math.floor(Math.random() * available.length)]
+    const rivalIndex = center ?? available[0]
 
     if (rivalIndex !== undefined) {
       next[rivalIndex] = 'O'
@@ -229,15 +234,6 @@ export function MemoryGame({ onComplete, onProgress }: MiniGameProps) {
     onProgress?.({ status: 'started', score: 0, currentPhase: 'board-start', currentLevel: 1, maxLevel: 1, attemptDelta: 1 })
   }, [onProgress])
 
-  useEffect(() => {
-    if (matched.length === 6) {
-      const score = moves <= 8 ? 100 : moves <= 12 ? 90 : 75
-      setMessage('Tabuleiro completo! Hora de comemorar.')
-      onProgress?.({ status: 'completed', score, currentPhase: 'board-complete', currentLevel: 1, maxLevel: 1, successDelta: 1, meta: { moves } })
-      onComplete(score)
-    }
-  }, [matched, moves, onComplete, onProgress])
-
   const reset = () => {
     setCards(shuffle(deck))
     setOpened([])
@@ -262,9 +258,12 @@ export function MemoryGame({ onComplete, onProgress }: MiniGameProps) {
       window.setTimeout(() => {
         if (same) {
           const nextMatched = [...matched, cards[first].emoji]
+          const isDone = nextMatched.length === 6
+          const score = isDone ? (nextMoves <= 8 ? 100 : nextMoves <= 12 ? 90 : 75) : Math.min(90, nextMatched.length * 15)
           setMatched(nextMatched)
-          setMessage('Par encontrado! Continue assim.')
-          onProgress?.({ status: 'started', score: Math.min(90, nextMatched.length * 15), currentPhase: 'pair-found', currentLevel: nextMatched.length, maxLevel: 6, meta: { moves: nextMoves, pairs: nextMatched.length } })
+          setMessage(isDone ? 'Tabuleiro completo! Hora de comemorar.' : 'Par encontrado! Continue assim.')
+          onProgress?.({ status: isDone ? 'completed' : 'started', score, currentPhase: isDone ? 'board-complete' : 'pair-found', currentLevel: nextMatched.length, maxLevel: 6, successDelta: isDone ? 1 : 0, meta: { moves: nextMoves, pairs: nextMatched.length } })
+          if (isDone) onComplete(score)
         } else {
           setMessage('Quase! Tente lembrar onde cada figura apareceu.')
           onProgress?.({ status: 'started', score: Math.max(10, 70 - nextMoves * 3), currentPhase: 'pair-miss', currentLevel: matched.length, maxLevel: 6, meta: { moves: nextMoves, pairs: matched.length } })
@@ -346,6 +345,9 @@ export function SequenceGame({ onComplete, onProgress }: MiniGameProps) {
   const [attempt, setAttempt] = useState<string[]>([])
   const [completed, setCompleted] = useState(false)
   const [message, setMessage] = useState('Copie a ordem das cores e avance de nivel.')
+  const reportProgress = useEffectEvent((payload: ProgressPayload) => {
+    onProgress?.(payload)
+  })
 
   const startLevel = (nextLevel: number, countAttempt = false) => {
     const length = Math.min(3 + nextLevel - 1, 6)
@@ -362,7 +364,7 @@ export function SequenceGame({ onComplete, onProgress }: MiniGameProps) {
   }
 
   useEffect(() => {
-    startLevel(1, true)
+    reportProgress({ status: 'started', score: 0, currentPhase: 'level-start', currentLevel: 1, maxLevel: 3, attemptDelta: 1 })
   }, [])
 
   const pick = (value: string) => {
@@ -451,20 +453,22 @@ export function SequenceGame({ onComplete, onProgress }: MiniGameProps) {
 }
 
 function WordSearchGame({ onComplete, onProgress }: MiniGameProps) {
-  const words = ['VACA', 'GATO', 'PATO', 'OVELHA', 'MILHO', 'TRATOR']
   const [foundWords, setFoundWords] = useState<string[]>([])
+  const reportProgress = useEffectEvent((payload: ProgressPayload) => {
+    onProgress?.(payload)
+  })
 
   useEffect(() => {
-    onProgress?.({ status: 'started', score: 0, currentPhase: 'word-search-start', currentLevel: 0, maxLevel: words.length, attemptDelta: 1 })
-  }, [onProgress])
+    reportProgress({ status: 'started', score: 0, currentPhase: 'word-search-start', currentLevel: 0, maxLevel: FARM_WORDS.length, attemptDelta: 1 })
+  }, [])
 
   const toggleWord = (word: string) => {
     if (foundWords.includes(word)) return
     const next = [...foundWords, word]
     setFoundWords(next)
     const score = Math.min(100, next.length * 16)
-    const isDone = next.length === words.length
-    onProgress?.({ status: isDone ? 'completed' : 'started', score, currentPhase: 'word-found', currentLevel: next.length, maxLevel: words.length, successDelta: isDone ? 1 : 0, meta: { foundWords: next } })
+    const isDone = next.length === FARM_WORDS.length
+    onProgress?.({ status: isDone ? 'completed' : 'started', score, currentPhase: 'word-found', currentLevel: next.length, maxLevel: FARM_WORDS.length, successDelta: isDone ? 1 : 0, meta: { foundWords: next } })
     if (isDone) onComplete(96)
   }
 
@@ -475,7 +479,7 @@ function WordSearchGame({ onComplete, onProgress }: MiniGameProps) {
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle className="text-2xl">Caca-palavras da fazenda</CardTitle>
-          <Pill tone="sun">{`${foundWords.length}/${words.length} palavras`}</Pill>
+          <Pill tone="sun">{`${foundWords.length}/${FARM_WORDS.length} palavras`}</Pill>
         </div>
         <CardDescription>Observe a grade e toque em cada palavra quando conseguir encontra-la.</CardDescription>
       </CardHeader>
@@ -490,7 +494,7 @@ function WordSearchGame({ onComplete, onProgress }: MiniGameProps) {
           ))}
         </div>
         <div className="flex flex-wrap gap-2">
-          {words.map((word) => {
+          {FARM_WORDS.map((word) => {
             const active = foundWords.includes(word)
             return (
               <button
@@ -507,7 +511,7 @@ function WordSearchGame({ onComplete, onProgress }: MiniGameProps) {
             )
           })}
         </div>
-        <GameStatus>{foundWords.length === words.length ? 'Todas encontradas! Agora vale imprimir e resolver de novo no papel.' : 'Toque nas palavras a medida que voce as encontra na grade.'}</GameStatus>
+        <GameStatus>{foundWords.length === FARM_WORDS.length ? 'Todas encontradas! Agora vale imprimir e resolver de novo no papel.' : 'Toque nas palavras a medida que voce as encontra na grade.'}</GameStatus>
       </CardContent>
     </Card>
   )
@@ -520,10 +524,13 @@ function MazeGame({ onComplete, onProgress }: MiniGameProps) {
   const [collisions, setCollisions] = useState(0)
   const [stars, setStars] = useState<string[]>([])
   const starCells = ['2-1', '4-3']
+  const reportProgress = useEffectEvent((payload: ProgressPayload) => {
+    onProgress?.(payload)
+  })
 
   useEffect(() => {
-    onProgress?.({ status: 'started', score: 0, currentPhase: 'maze-start', currentLevel: 1, maxLevel: 1, attemptDelta: 1 })
-  }, [onProgress])
+    reportProgress({ status: 'started', score: 0, currentPhase: 'maze-start', currentLevel: 1, maxLevel: 1, attemptDelta: 1 })
+  }, [])
 
   const move = (rowDelta: number, colDelta: number) => {
     const next: [number, number] = [position[0] + rowDelta, position[1] + colDelta]
@@ -612,37 +619,39 @@ function MazeGame({ onComplete, onProgress }: MiniGameProps) {
 function ConnectDotsGame({ onComplete, onProgress }: MiniGameProps) {
   const [nextExpected, setNextExpected] = useState(1)
   const [mistakes, setMistakes] = useState(0)
-  const points = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+  const reportProgress = useEffectEvent((payload: ProgressPayload) => {
+    onProgress?.(payload)
+  })
 
   useEffect(() => {
-    onProgress?.({ status: 'started', score: 0, currentPhase: 'connect-start', currentLevel: 1, maxLevel: points.length, attemptDelta: 1 })
-  }, [onProgress])
+    reportProgress({ status: 'started', score: 0, currentPhase: 'connect-start', currentLevel: 1, maxLevel: CONNECT_DOT_POINTS.length, attemptDelta: 1 })
+  }, [])
 
   const clickPoint = (label: string) => {
     const expected = String(nextExpected)
     if (label !== expected) {
       const nextMistakes = mistakes + 1
       setMistakes(nextMistakes)
-      onProgress?.({ status: 'started', score: Math.max(5, 60 - nextMistakes * 5), currentPhase: 'connect-miss', currentLevel: nextExpected, maxLevel: points.length, meta: { mistakes: nextMistakes } })
+      onProgress?.({ status: 'started', score: Math.max(5, 60 - nextMistakes * 5), currentPhase: 'connect-miss', currentLevel: nextExpected, maxLevel: CONNECT_DOT_POINTS.length, meta: { mistakes: nextMistakes } })
       return
     }
 
     const upcoming = nextExpected + 1
-    if (upcoming > points.length) {
-      onProgress?.({ status: 'completed', score: Math.max(80, 100 - mistakes * 4), currentPhase: 'connect-complete', currentLevel: points.length, maxLevel: points.length, successDelta: 1, meta: { mistakes } })
+    if (upcoming > CONNECT_DOT_POINTS.length) {
+      onProgress?.({ status: 'completed', score: Math.max(80, 100 - mistakes * 4), currentPhase: 'connect-complete', currentLevel: CONNECT_DOT_POINTS.length, maxLevel: CONNECT_DOT_POINTS.length, successDelta: 1, meta: { mistakes } })
       onComplete(Math.max(80, 100 - mistakes * 4))
       setNextExpected(upcoming)
       return
     }
 
     setNextExpected(upcoming)
-    onProgress?.({ status: 'started', score: upcoming * 7, currentPhase: 'connect-progress', currentLevel: upcoming, maxLevel: points.length, meta: { mistakes } })
+    onProgress?.({ status: 'started', score: upcoming * 7, currentPhase: 'connect-progress', currentLevel: upcoming, maxLevel: CONNECT_DOT_POINTS.length, meta: { mistakes } })
   }
 
   const reset = () => {
     setNextExpected(1)
     setMistakes(0)
-    onProgress?.({ status: 'started', score: 0, currentPhase: 'connect-reset', currentLevel: 1, maxLevel: points.length, attemptDelta: 1 })
+    onProgress?.({ status: 'started', score: 0, currentPhase: 'connect-reset', currentLevel: 1, maxLevel: CONNECT_DOT_POINTS.length, attemptDelta: 1 })
   }
 
   return (
@@ -650,13 +659,13 @@ function ConnectDotsGame({ onComplete, onProgress }: MiniGameProps) {
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle className="text-2xl">Ligue os pontos do dragao</CardTitle>
-          <Pill tone="sun">{`${Math.min(nextExpected - 1, points.length)}/${points.length}`}</Pill>
+          <Pill tone="sun">{`${Math.min(nextExpected - 1, CONNECT_DOT_POINTS.length)}/${CONNECT_DOT_POINTS.length}`}</Pill>
         </div>
         <CardDescription>Toque nos numeros em ordem. O desenho aparece aos poucos e a etapa final revela o dragao.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="grid grid-cols-4 gap-6 rounded-[24px] border border-dashed border-soft-border bg-sand/30 p-6 text-center text-sm font-bold text-ink">
-          {points.map((label, index) => {
+            {CONNECT_DOT_POINTS.map((label, index) => {
             const numeric = index + 1
             const done = numeric < nextExpected
             const current = numeric === nextExpected
@@ -676,7 +685,7 @@ function ConnectDotsGame({ onComplete, onProgress }: MiniGameProps) {
           })}
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] bg-[#f7fbff] p-4">
-          <GameStatus>{nextExpected > points.length ? 'Dragao revelado! Agora vale imprimir para colorir.' : `Procure o numero ${nextExpected}. Erros ate agora: ${mistakes}.`}</GameStatus>
+          <GameStatus>{nextExpected > CONNECT_DOT_POINTS.length ? 'Dragao revelado! Agora vale imprimir para colorir.' : `Procure o numero ${nextExpected}. Erros ate agora: ${mistakes}.`}</GameStatus>
           <Button variant="secondary" size="sm" onClick={reset}>
             <RefreshCw className="h-4 w-4" /> Recomeçar
           </Button>
