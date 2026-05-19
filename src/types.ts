@@ -1,6 +1,6 @@
 export type UserRole = 'child' | 'guardian'
 export type FavoriteKind = 'story' | 'game' | 'printable'
-export type GameEngine = 'tic-tac-toe' | 'memory' | 'sequence' | 'worksheet'
+export type GameEngine = 'tic-tac-toe' | 'memory' | 'sequence' | 'worksheet' | 'quiz' | 'math-stars' | 'syllables'
 
 export interface SessionUser {
   id: string

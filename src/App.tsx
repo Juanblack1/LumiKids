@@ -38,7 +38,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { MemoryGame, SequenceGame, TicTacToeGame, WorksheetGame, type GameDifficulty } from '@/components/mini-games'
+import { MathStarsGame, MemoryGame, QuizGame, SequenceGame, SyllableGame, TicTacToeGame, WorksheetGame, type GameDifficulty } from '@/components/mini-games'
 import {
   getCatalog,
   getChildActivity,
@@ -143,6 +143,9 @@ const gameArtMap: Record<string, string> = {
   'caca-palavras-da-fazenda': '/ai-assets/printable-worksheet.png',
   'labirinto-do-foguete': '/ai-assets/game-maze.png',
   'ligue-os-pontos-do-dragao': '/ai-assets/printable-worksheet.png',
+  'quiz-relampago': '/ai-assets/story-library-treasure.png',
+  'conta-estrelinhas': '/ai-assets/category-numbers.png',
+  'arrume-as-silabas': '/ai-assets/category-alphabet.png',
 }
 
 const printableArtMap: Record<string, string> = {
@@ -561,17 +564,20 @@ function GameCard({ game }: { game: Game }) {
   const image = gameArtMap[game.slug] ?? '/ai-assets/game-tictactoe.png'
 
   return (
-    <Card className={cn('h-full overflow-hidden bg-gradient-to-br transition hover:-translate-y-0.5 hover:shadow-[0_24px_70px_rgba(25,50,60,0.12)]', toneMap[game.coverTone])}>
+    <Card className={cn('group relative h-full overflow-hidden bg-gradient-to-br transition hover:-translate-y-0.5 hover:shadow-[0_24px_70px_rgba(25,50,60,0.12)]', toneMap[game.coverTone])}>
+      <Link to={`/games/${game.slug}`} aria-label={`Abrir jogo ${game.title}`} className="absolute inset-0 z-10 rounded-[30px]" />
       <CardHeader className="gap-3 p-4 sm:gap-4 sm:p-6">
         <div className="overflow-hidden rounded-[22px] border border-white/70 bg-white/70">
-          <img src={image} alt={`Thumbnail ilustrada do jogo ${game.title}`} className="h-32 w-full object-cover sm:h-40" />
+          <img src={image} alt={`Thumbnail ilustrada do jogo ${game.title}`} className="h-32 w-full object-cover transition duration-300 group-hover:scale-[1.03] sm:h-40" />
         </div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-wrap gap-2">
             <Badge className="bg-white/80 text-[10px] text-muted-ink">{game.ageRange}</Badge>
             <Badge className="bg-white/65 text-[10px] text-muted-ink">{game.difficulty}</Badge>
           </div>
-          <FavoriteButton active={favoriteSet.has(favoriteKey)} onClick={() => void toggleFavoriteAction('game', game.slug)} />
+          <div className="relative z-20">
+            <FavoriteButton active={favoriteSet.has(favoriteKey)} onClick={() => void toggleFavoriteAction('game', game.slug)} />
+          </div>
         </div>
         <div>
           <CardTitle className="text-[1.32rem] leading-tight sm:text-[1.55rem]">{game.title}</CardTitle>
@@ -588,7 +594,7 @@ function GameCard({ game }: { game: Game }) {
         </div>
         <div className="flex items-center justify-between gap-3">
           <span className="text-sm font-bold text-muted-ink">{getProgressDetail(progress, game.reward)}</span>
-          <Button variant="secondary" size="sm" asChild>
+          <Button className="relative z-20" variant="secondary" size="sm" asChild>
             <Link to={`/games/${game.slug}`}>Jogar</Link>
           </Button>
         </div>
@@ -1619,6 +1625,9 @@ function GameDetailPage() {
             {game.engine === 'memory' && <MemoryGame key={`${game.slug}-${difficulty}`} difficulty={difficulty} onComplete={complete} onProgress={handleGameProgress} />}
             {game.engine === 'sequence' && <SequenceGame key={`${game.slug}-${difficulty}`} difficulty={difficulty} onComplete={complete} onProgress={handleGameProgress} />}
             {game.engine === 'worksheet' && <WorksheetGame key={`${game.slug}-${difficulty}`} difficulty={difficulty} slug={game.slug as 'caca-palavras-da-fazenda' | 'labirinto-do-foguete' | 'ligue-os-pontos-do-dragao'} onComplete={complete} onProgress={handleGameProgress} />}
+            {game.engine === 'quiz' && <QuizGame key={`${game.slug}-${difficulty}`} difficulty={difficulty} onComplete={complete} onProgress={handleGameProgress} />}
+            {game.engine === 'math-stars' && <MathStarsGame key={`${game.slug}-${difficulty}`} difficulty={difficulty} onComplete={complete} onProgress={handleGameProgress} />}
+            {game.engine === 'syllables' && <SyllableGame key={`${game.slug}-${difficulty}`} difficulty={difficulty} onComplete={complete} onProgress={handleGameProgress} />}
           </div>
 
           <Card className="bg-white/95 print-card">

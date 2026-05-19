@@ -100,6 +100,13 @@ describe('App integration', () => {
       expect(screen.getByRole('heading', { name: /Mini games educativos com instrucoes simples/i })).toBeInTheDocument()
     })
     expect(screen.getByText(/Memoria dos animais/i)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('link', { name: /Abrir jogo Memoria dos animais/i }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Memoria dos animais/i })).toBeInTheDocument()
+    })
+    expect(screen.getByText(/Escolha a dificuldade/i)).toBeInTheDocument()
   })
 
   it('shows a guardian dashboard with child activity', async () => {

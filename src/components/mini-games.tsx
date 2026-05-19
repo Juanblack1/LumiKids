@@ -25,8 +25,101 @@ type MiniGameProps = {
 }
 
 type WorksheetSlug = 'caca-palavras-da-fazenda' | 'labirinto-do-foguete' | 'ligue-os-pontos-do-dragao'
-const FARM_WORDS = ['VACA', 'GATO', 'PATO', 'OVELHA', 'MILHO', 'TRATOR']
 const CONNECT_DOT_POINTS = Array.from({ length: 16 }, (_, index) => String(index + 1))
+
+const timeLimits: Record<GameDifficulty, number | null> = {
+  easy: null,
+  medium: 90,
+  challenge: 55,
+}
+
+const memoryThemes = [
+  { name: 'Bichinhos da floresta', emojis: ['🦊', '🐻', '🦉', '🐿️', '🦔', '🦝', '🐰', '🦌'] },
+  { name: 'Festa no espaço', emojis: ['🚀', '🪐', '⭐', '🌙', '☄️', '🛸', '👩‍🚀', '🌎'] },
+  { name: 'Frutas coloridas', emojis: ['🍎', '🍌', '🍓', '🍇', '🍉', '🍍', '🥝', '🍒'] },
+  { name: 'Praia divertida', emojis: ['🐳', '🐠', '🐙', '🦀', '🐚', '🏖️', '⛵', '🌊'] },
+]
+
+const wordSearchRounds = [
+  {
+    theme: 'Fazenda feliz',
+    words: ['VACA', 'GATO', 'PATO', 'OVELHA', 'MILHO', 'TRATOR'],
+    rows: ['VACAOQTR', 'GATOBMIL', 'MILHOPAZ', 'PATOREIS', 'TRATORUZ', 'OVELHAQC'],
+  },
+  {
+    theme: 'Praia ensolarada',
+    words: ['SOL', 'MAR', 'AREIA', 'PEIXE', 'CONCHA', 'BARCO'],
+    rows: ['SOLARCOB', 'MAREQPRA', 'AREIAZUL', 'PEIXEFOZ', 'CONCHAXY', 'BARCOTIM'],
+  },
+  {
+    theme: 'Espaço curioso',
+    words: ['LUA', 'SOL', 'ROBO', 'ASTRO', 'FOGUETE', 'PLANETA'],
+    rows: ['LUAXROBO', 'SOLNAVEQ', 'ASTROZIM', 'FOGUETEX', 'PLANETAX', 'COMETARI'],
+  },
+]
+
+const mazeRounds = [
+  {
+    theme: 'Rota das estrelas',
+    safe: ['0-0', '1-0', '2-0', '2-1', '2-2', '3-2', '4-2', '4-3', '4-4'],
+    easyExtra: ['0-1', '1-1', '1-2', '3-3'],
+    stars: ['2-1', '4-3'],
+    goal: '4-4',
+  },
+  {
+    theme: 'Cinturão de asteroides',
+    safe: ['0-0', '0-1', '0-2', '1-2', '2-2', '2-3', '3-3', '4-3', '4-4'],
+    easyExtra: ['1-0', '1-1', '3-2', '3-4'],
+    stars: ['0-2', '3-3'],
+    goal: '4-4',
+  },
+  {
+    theme: 'Volta pela nebulosa',
+    safe: ['0-0', '1-0', '1-1', '1-2', '2-2', '3-2', '3-1', '4-1', '4-2', '4-3', '4-4'],
+    easyExtra: ['0-1', '2-1', '3-3'],
+    stars: ['1-2', '4-1'],
+    goal: '4-4',
+  },
+]
+
+const quizRounds = [
+  {
+    theme: 'Animais',
+    questions: [
+      { prompt: 'Qual animal late?', options: ['Gato', 'Cachorro', 'Peixe'], answer: 'Cachorro' },
+      { prompt: 'Quem vive no mar?', options: ['Baleia', 'Galinha', 'Cavalo'], answer: 'Baleia' },
+      { prompt: 'Qual animal tem listras?', options: ['Zebra', 'Pato', 'Sapo'], answer: 'Zebra' },
+    ],
+  },
+  {
+    theme: 'Natureza',
+    questions: [
+      { prompt: 'O que nasce da semente?', options: ['Planta', 'Pedra', 'Lua'], answer: 'Planta' },
+      { prompt: 'O que ilumina o dia?', options: ['Sol', 'Nuvem', 'Sapato'], answer: 'Sol' },
+      { prompt: 'Onde o peixe nada?', options: ['Água', 'Árvore', 'Areia'], answer: 'Água' },
+    ],
+  },
+  {
+    theme: 'Cores',
+    questions: [
+      { prompt: 'Mistura de azul e amarelo lembra qual cor?', options: ['Verde', 'Rosa', 'Marrom'], answer: 'Verde' },
+      { prompt: 'Qual cor parece uma banana madura?', options: ['Amarelo', 'Azul', 'Cinza'], answer: 'Amarelo' },
+      { prompt: 'Qual cor parece o céu limpo?', options: ['Azul', 'Preto', 'Laranja'], answer: 'Azul' },
+    ],
+  },
+]
+
+const mathRounds = [
+  { theme: 'Estrelas', items: '⭐', problems: [{ prompt: '2 + 1', answer: 3 }, { prompt: '3 + 2', answer: 5 }, { prompt: '5 - 2', answer: 3 }] },
+  { theme: 'Maçãs', items: '🍎', problems: [{ prompt: '1 + 4', answer: 5 }, { prompt: '6 - 3', answer: 3 }, { prompt: '2 + 5', answer: 7 }] },
+  { theme: 'Balões', items: '🎈', problems: [{ prompt: '4 + 2', answer: 6 }, { prompt: '7 - 2', answer: 5 }, { prompt: '3 + 3', answer: 6 }] },
+]
+
+const syllableRounds = [
+  { theme: 'Animais', words: [{ word: 'GATO', syllables: ['GA', 'TO'] }, { word: 'PATO', syllables: ['PA', 'TO'] }, { word: 'MACACO', syllables: ['MA', 'CA', 'CO'] }] },
+  { theme: 'Comidas', words: [{ word: 'BOLO', syllables: ['BO', 'LO'] }, { word: 'PIPOCA', syllables: ['PI', 'PO', 'CA'] }, { word: 'MELAO', syllables: ['ME', 'LAO'] }] },
+  { theme: 'Natureza', words: [{ word: 'LUA', syllables: ['LU', 'A'] }, { word: 'MATA', syllables: ['MA', 'TA'] }, { word: 'JARDIM', syllables: ['JAR', 'DIM'] }] },
+]
 
 const difficultyCopy: Record<GameDifficulty, { label: string; tag: string }> = {
   easy: { label: 'Facil', tag: 'primeiros passos' },
@@ -82,6 +175,49 @@ function ControlHint({ touch, keyboard, difficulty }: { touch: string; keyboard:
   )
 }
 
+function TimerPanel({ difficulty, onExpire, seconds = timeLimits[difficulty] }: { difficulty: GameDifficulty; onExpire: () => void; seconds?: number | null }) {
+  const [timeLeft, setTimeLeft] = useState(seconds ?? 0)
+  const expire = useEffectEvent(() => onExpire())
+
+  useEffect(() => {
+    if (!seconds) return
+
+    const id = window.setInterval(() => {
+      setTimeLeft((current) => {
+        if (current <= 1) {
+          window.clearInterval(id)
+          expire()
+          return 0
+        }
+
+        return current - 1
+      })
+    }, 1000)
+
+    return () => window.clearInterval(id)
+  }, [seconds])
+
+  if (!seconds) {
+    return (
+      <div className="rounded-[24px] bg-mint/70 p-4 text-sm font-extrabold text-ink">
+        Modo fácil: sem tempo. Brinque no seu ritmo.
+      </div>
+    )
+  }
+
+  const urgent = timeLeft <= 15
+
+  return (
+    <div className={cn('rounded-[24px] p-4 text-sm font-extrabold text-ink', urgent ? 'bg-coral/18 text-coral' : 'bg-sun/45')}>
+      Tempo restante: <span className="font-display text-xl">{timeLeft}s</span>
+    </div>
+  )
+}
+
+function nextRoundIndex(current: number, total: number) {
+  return (current + 1) % total
+}
+
 function ProgressStrip({ value, tone = 'aqua' }: { value: number; tone?: 'aqua' | 'coral' | 'sun' }) {
   const toneClass = tone === 'coral' ? 'from-coral to-sun' : tone === 'sun' ? 'from-sun to-coral' : 'from-aqua to-sky'
 
@@ -104,6 +240,7 @@ export function TicTacToeGame({ onComplete, onProgress, difficulty = 'easy' }: M
   const [winner, setWinner] = useState<string | null>(null)
   const [winningCells, setWinningCells] = useState<number[]>([])
   const [roundScore, setRoundScore] = useState({ child: 0, luna: 0, draws: 0 })
+  const [roundId, setRoundId] = useState(0)
   const reportProgress = useEffectEvent((payload: ProgressPayload) => {
     onProgress?.(payload)
   })
@@ -174,6 +311,7 @@ export function TicTacToeGame({ onComplete, onProgress, difficulty = 'easy' }: M
     setBoard(Array(9).fill(''))
     setWinner(null)
     setWinningCells([])
+    setRoundId((current) => current + 1)
     onProgress?.({ status: 'started', score: 0, currentPhase: 'new-round', currentLevel: 1, maxLevel: 1, attemptDelta: 1, meta: { roundScore } })
   }
 
@@ -182,7 +320,16 @@ export function TicTacToeGame({ onComplete, onProgress, difficulty = 'easy' }: M
     setWinner(null)
     setWinningCells([])
     setRoundScore({ child: 0, luna: 0, draws: 0 })
+    setRoundId((current) => current + 1)
     onProgress?.({ status: 'started', score: 0, currentPhase: 'match-reset', currentLevel: 1, maxLevel: 1, attemptDelta: 1 })
+  }
+
+  const expireRound = () => {
+    if (winner) return
+    const nextScore = { ...roundScore, luna: roundScore.luna + 1 }
+    setWinner('O')
+    setRoundScore(nextScore)
+    onProgress?.({ status: 'started', score: 20, currentPhase: 'time-expired', currentLevel: 1, maxLevel: 1, meta: { difficulty, roundScore: nextScore } })
   }
 
   const finishRound = (result: { winner: string; line: number[] }, nextBoard: string[]) => {
@@ -263,6 +410,7 @@ export function TicTacToeGame({ onComplete, onProgress, difficulty = 'easy' }: M
       </CardHeader>
       <CardContent className="space-y-5 p-5 pt-0 sm:p-6 sm:pt-0">
         <ControlHint touch="toque em uma casa livre" keyboard={['1-9']} difficulty={difficulty} />
+        <TimerPanel key={`${difficulty}-${roundId}`} difficulty={difficulty} onExpire={expireRound} />
 
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-[22px] bg-sand/70 p-4 text-center">
@@ -317,13 +465,15 @@ export function TicTacToeGame({ onComplete, onProgress, difficulty = 'easy' }: M
 
 export function MemoryGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGameProps) {
   const pairCount = difficulty === 'easy' ? 4 : difficulty === 'medium' ? 6 : 8
+  const [roundIndex, setRoundIndex] = useState(0)
+  const theme = memoryThemes[roundIndex % memoryThemes.length]
   const deck = useMemo(
     () =>
-      ['🦊', '🐳', '🌈', '🚀', '🍎', '🎈', '🦁', '🐢']
+      theme.emojis
         .slice(0, pairCount)
         .flatMap((item) => [item, item])
         .map((emoji, index) => ({ id: `${emoji}-${index}`, emoji })),
-    [pairCount],
+    [pairCount, theme],
   )
   const [cards, setCards] = useState(() => shuffle(deck))
   const [opened, setOpened] = useState<number[]>([])
@@ -345,6 +495,29 @@ export function MemoryGame({ onComplete, onProgress, difficulty = 'easy' }: Mini
     setMoves(0)
     setMessage('Encontre todos os pares para ganhar estrelas.')
     onProgress?.({ status: 'started', score: 0, currentPhase: 'board-reset', currentLevel: 1, maxLevel: pairCount, attemptDelta: 1, meta: { difficulty } })
+  }
+
+  const nextRound = () => {
+    const nextIndex = nextRoundIndex(roundIndex, memoryThemes.length)
+    const nextTheme = memoryThemes[nextIndex]
+    const nextDeck = nextTheme.emojis
+      .slice(0, pairCount)
+      .flatMap((item) => [item, item])
+      .map((emoji, index) => ({ id: `${emoji}-${index}`, emoji }))
+
+    setRoundIndex(nextIndex)
+    setCards(shuffle(nextDeck))
+    setOpened([])
+    setMatched([])
+    setMoves(0)
+    setMessage(`Nova rodada: ${nextTheme.name}.`)
+    onProgress?.({ status: 'started', score: 0, currentPhase: 'new-memory-round', currentLevel: 1, maxLevel: pairCount, attemptDelta: 1, meta: { difficulty, theme: nextTheme.name } })
+  }
+
+  const expireRound = () => {
+    if (matched.length >= pairCount) return
+    setMessage('O tempo acabou! Tente uma nova rodada com outro tema.')
+    onProgress?.({ status: 'started', score: Math.max(5, matched.length * 10), currentPhase: 'time-expired', currentLevel: matched.length, maxLevel: pairCount, meta: { difficulty, theme: theme.name, moves } })
   }
 
   const reveal = (index: number) => {
@@ -387,12 +560,13 @@ export function MemoryGame({ onComplete, onProgress, difficulty = 'easy' }: Mini
           <CardTitle className="flex items-center gap-2 text-2xl sm:text-3xl">
             <Trophy className="h-5 w-5 text-coral" /> Memoria encantada
           </CardTitle>
-          <Pill tone="aqua">{`${pairCount} pares`}</Pill>
+          <Pill tone="aqua">{theme.name}</Pill>
         </div>
         <CardDescription>Vire duas cartas por vez e tente completar o tabuleiro com poucos movimentos.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5 p-5 pt-0 sm:p-6 sm:pt-0">
         <ControlHint touch="toque em duas cartas" keyboard={['Tab', 'Enter']} difficulty={difficulty} />
+        <TimerPanel key={`${difficulty}-${roundIndex}`} difficulty={difficulty} onExpire={expireRound} />
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] bg-[#f7fbff] p-4">
           <div className="space-y-1">
@@ -433,9 +607,14 @@ export function MemoryGame({ onComplete, onProgress, difficulty = 'easy' }: Mini
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] bg-white/85 p-4">
           <GameStatus>{message}</GameStatus>
+          <div className="flex flex-wrap gap-2">
           <Button variant="secondary" size="sm" onClick={reset}>
             <RefreshCw className="h-4 w-4" /> Embaralhar
           </Button>
+          <Button variant="secondary" size="sm" onClick={nextRound}>
+            Nova rodada
+          </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -458,6 +637,7 @@ export function SequenceGame({ onComplete, onProgress, difficulty = 'easy' }: Mi
   const [attempt, setAttempt] = useState<string[]>([])
   const [completed, setCompleted] = useState(false)
   const [message, setMessage] = useState('Copie a ordem das cores e avance de nivel.')
+  const [roundId, setRoundId] = useState(0)
   const reportProgress = useEffectEvent((payload: ProgressPayload) => {
     onProgress?.(payload)
   })
@@ -467,6 +647,7 @@ export function SequenceGame({ onComplete, onProgress, difficulty = 'easy' }: Mi
     setPattern(shuffle(palette.map((item) => item.id)).slice(0, length))
     setAttempt([])
     setCompleted(false)
+    setRoundId((current) => current + 1)
     setMessage(nextLevel === 1 ? 'Copie a ordem das cores e avance de nivel.' : `Nivel ${nextLevel}: padrao maior, mais concentracao!`)
     onProgress?.({ status: 'started', score: Math.min(80, nextLevel * 20), currentPhase: 'level-start', currentLevel: nextLevel, maxLevel, attemptDelta: countAttempt ? 1 : 0, meta: { difficulty } })
   }
@@ -474,6 +655,12 @@ export function SequenceGame({ onComplete, onProgress, difficulty = 'easy' }: Mi
   const reset = () => {
     setLevel(1)
     startLevel(1, true)
+  }
+
+  const expireRound = () => {
+    if (completed) return
+    setMessage('O tempo acabou! Recomece e tente copiar com calma.')
+    onProgress?.({ status: 'started', score: Math.max(5, attempt.length * 10), currentPhase: 'time-expired', currentLevel: level, maxLevel, meta: { difficulty, progressInLevel: attempt.length } })
   }
 
   useEffect(() => {
@@ -544,6 +731,7 @@ export function SequenceGame({ onComplete, onProgress, difficulty = 'easy' }: Mi
       </CardHeader>
       <CardContent className="space-y-5 p-5 pt-0 sm:p-6 sm:pt-0">
         <ControlHint touch="toque nas cores em ordem" keyboard={palette.map((_, index) => String(index + 1))} difficulty={difficulty} />
+        <TimerPanel key={`${difficulty}-${roundId}`} difficulty={difficulty} onExpire={expireRound} />
 
         <ProgressStrip value={(level / maxLevel) * 100} tone="sun" />
 
@@ -588,15 +776,17 @@ export function SequenceGame({ onComplete, onProgress, difficulty = 'easy' }: Mi
 }
 
 function WordSearchGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGameProps) {
-  const targetWords = FARM_WORDS.slice(0, difficulty === 'easy' ? 4 : FARM_WORDS.length)
+  const [roundIndex, setRoundIndex] = useState(0)
+  const round = wordSearchRounds[roundIndex % wordSearchRounds.length]
+  const targetWords = round.words.slice(0, difficulty === 'easy' ? 4 : round.words.length)
   const [foundWords, setFoundWords] = useState<string[]>([])
   const reportProgress = useEffectEvent((payload: ProgressPayload) => {
     onProgress?.(payload)
   })
 
   useEffect(() => {
-    reportProgress({ status: 'started', score: 0, currentPhase: 'word-search-start', currentLevel: 0, maxLevel: targetWords.length, attemptDelta: 1, meta: { difficulty } })
-  }, [difficulty, targetWords.length])
+    reportProgress({ status: 'started', score: 0, currentPhase: 'word-search-start', currentLevel: 0, maxLevel: targetWords.length, attemptDelta: 1, meta: { difficulty, theme: round.theme } })
+  }, [difficulty, round.theme, targetWords.length])
 
   const toggleWord = (word: string) => {
     if (foundWords.includes(word)) return
@@ -604,28 +794,40 @@ function WordSearchGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGam
     setFoundWords(next)
     const score = Math.min(100, Math.round((next.length / targetWords.length) * (difficulty === 'challenge' ? 100 : 96)))
     const isDone = next.length === targetWords.length
-    onProgress?.({ status: isDone ? 'completed' : 'started', score, currentPhase: 'word-found', currentLevel: next.length, maxLevel: targetWords.length, successDelta: isDone ? 1 : 0, meta: { difficulty, foundWords: next } })
+    onProgress?.({ status: isDone ? 'completed' : 'started', score, currentPhase: 'word-found', currentLevel: next.length, maxLevel: targetWords.length, successDelta: isDone ? 1 : 0, meta: { difficulty, theme: round.theme, foundWords: next } })
     if (isDone) onComplete(difficulty === 'challenge' ? 100 : 96)
   }
 
-  const rows = ['VACAOQTR', 'GATOBMIL', 'MILHOPAZ', 'PATOREIS', 'TRATORUZ', 'OVELHAQC']
+  const nextRound = () => {
+    const nextIndex = nextRoundIndex(roundIndex, wordSearchRounds.length)
+    const nextMaxLevel = difficulty === 'easy' ? 4 : wordSearchRounds[nextIndex].words.length
+    setRoundIndex(nextIndex)
+    setFoundWords([])
+    onProgress?.({ status: 'started', score: 0, currentPhase: 'new-word-round', currentLevel: 0, maxLevel: nextMaxLevel, attemptDelta: 1, meta: { difficulty, theme: wordSearchRounds[nextIndex].theme } })
+  }
+
+  const expireRound = () => {
+    if (foundWords.length >= targetWords.length) return
+    onProgress?.({ status: 'started', score: Math.max(5, foundWords.length * 12), currentPhase: 'time-expired', currentLevel: foundWords.length, maxLevel: targetWords.length, meta: { difficulty, theme: round.theme, foundWords } })
+  }
 
   return (
     <Card className="print-card overflow-hidden bg-gradient-to-br from-white via-sand to-sun/20">
       <CardHeader className="p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle className="text-2xl sm:text-3xl">Caca-palavras da fazenda</CardTitle>
-          <Pill tone="sun">{`${foundWords.length}/${targetWords.length} palavras`}</Pill>
+          <Pill tone="sun">{round.theme}</Pill>
         </div>
         <CardDescription>Observe a grade e toque em cada palavra quando conseguir encontra-la.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5 p-5 pt-0 sm:p-6 sm:pt-0">
         <ControlHint touch="encontre na grade e toque na palavra" keyboard={['Tab', 'Enter']} difficulty={difficulty} />
+        <TimerPanel key={`${difficulty}-${roundIndex}`} difficulty={difficulty} onExpire={expireRound} />
 
         <ProgressStrip value={(foundWords.length / targetWords.length) * 100} tone="sun" />
 
         <div className="rounded-[28px] border border-dashed border-soft-border bg-white/75 p-3 font-display text-base font-black tracking-[0.14em] text-ink shadow-inner sm:p-4 sm:text-lg sm:tracking-[0.18em]">
-          {rows.map((row) => (
+          {round.rows.map((row) => (
             <div key={row} className="grid grid-cols-8 gap-1 py-1 sm:gap-2">
               {row.split('').map((letter, index) => (
                 <span key={`${row}-${index}`} className="rounded-[10px] bg-sand/55 py-1 text-center">{letter}</span>
@@ -652,7 +854,10 @@ function WordSearchGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGam
           })}
         </div>
         <div className="rounded-[24px] bg-white/85 p-4">
-          <GameStatus>{foundWords.length === targetWords.length ? 'Todas encontradas! Agora vale imprimir e resolver de novo no papel.' : 'Toque nas palavras a medida que voce as encontra na grade.'}</GameStatus>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <GameStatus>{foundWords.length === targetWords.length ? 'Todas encontradas! Agora vale imprimir e resolver de novo no papel.' : `Palavras: ${foundWords.length}/${targetWords.length}. Toque na lista quando encontrar.`}</GameStatus>
+            <Button variant="secondary" size="sm" onClick={nextRound}>Nova rodada</Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -660,23 +865,23 @@ function WordSearchGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGam
 }
 
 function MazeGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGameProps) {
-  const baseSafeCells = ['0-0', '1-0', '2-0', '2-1', '2-2', '3-2', '4-2', '4-3', '4-4']
-  const easyExtraCells = ['0-1', '1-1', '1-2', '3-3']
-  const safeCells = new Set(difficulty === 'easy' ? [...baseSafeCells, ...easyExtraCells] : baseSafeCells)
-  const goal = '4-4'
+  const [roundIndex, setRoundIndex] = useState(0)
+  const round = mazeRounds[roundIndex % mazeRounds.length]
+  const safeCells = new Set(difficulty === 'easy' ? [...round.safe, ...round.easyExtra] : round.safe)
+  const goal = round.goal
   const [position, setPosition] = useState<[number, number]>([0, 0])
   const [collisions, setCollisions] = useState(0)
   const [stars, setStars] = useState<string[]>([])
   const [message, setMessage] = useState('Colete estrelas e encontre a saida brilhante.')
-  const starCells = ['2-1', '4-3']
+  const starCells = round.stars
   const maxLevel = starCells.length + 1
   const reportProgress = useEffectEvent((payload: ProgressPayload) => {
     onProgress?.(payload)
   })
 
   useEffect(() => {
-    reportProgress({ status: 'started', score: 0, currentPhase: 'maze-start', currentLevel: 1, maxLevel, attemptDelta: 1, meta: { difficulty } })
-  }, [difficulty, maxLevel])
+    reportProgress({ status: 'started', score: 0, currentPhase: 'maze-start', currentLevel: 1, maxLevel, attemptDelta: 1, meta: { difficulty, theme: round.theme } })
+  }, [difficulty, maxLevel, round.theme])
 
   const move = (rowDelta: number, colDelta: number) => {
     const next: [number, number] = [position[0] + rowDelta, position[1] + colDelta]
@@ -688,7 +893,7 @@ function MazeGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGameProps
       setCollisions(nextCollisions)
       setMessage('Asteroide no caminho! Volte para a trilha clara.')
       const penalty = difficulty === 'challenge' ? 14 : 10
-      onProgress?.({ status: 'started', score: Math.max(10, 70 - nextCollisions * penalty), currentPhase: 'maze-bump', currentLevel: stars.length + 1, maxLevel, meta: { difficulty, collisions: nextCollisions } })
+      onProgress?.({ status: 'started', score: Math.max(10, 70 - nextCollisions * penalty), currentPhase: 'maze-bump', currentLevel: stars.length + 1, maxLevel, meta: { difficulty, theme: round.theme, collisions: nextCollisions } })
       return
     }
 
@@ -699,19 +904,19 @@ function MazeGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGameProps
     if (key === goal) {
       if (difficulty === 'challenge' && nextStars.length < starCells.length) {
         setMessage('No modo desafio, pegue as duas estrelas antes de pousar.')
-        onProgress?.({ status: 'started', score: 72, currentPhase: 'maze-need-stars', currentLevel: nextStars.length + 1, maxLevel, meta: { difficulty, stars: nextStars.length, collisions } })
+        onProgress?.({ status: 'started', score: 72, currentPhase: 'maze-need-stars', currentLevel: nextStars.length + 1, maxLevel, meta: { difficulty, theme: round.theme, stars: nextStars.length, collisions } })
         return
       }
 
       const score = Math.max(70, 100 - collisions * 8 + nextStars.length * 5)
       setMessage('Pouso perfeito! Missao espacial concluida.')
-      onProgress?.({ status: 'completed', score, currentPhase: 'maze-finish', currentLevel: nextStars.length + 1, maxLevel, successDelta: 1, meta: { difficulty, stars: nextStars.length, collisions } })
+      onProgress?.({ status: 'completed', score, currentPhase: 'maze-finish', currentLevel: nextStars.length + 1, maxLevel, successDelta: 1, meta: { difficulty, theme: round.theme, stars: nextStars.length, collisions } })
       onComplete(score)
       return
     }
 
     setMessage(nextStars.length > stars.length ? 'Estrela coletada! Continue pela trilha.' : 'Boa rota! Continue planejando o caminho.')
-    onProgress?.({ status: 'started', score: 30 + nextStars.length * 20, currentPhase: 'maze-progress', currentLevel: nextStars.length + 1, maxLevel, meta: { difficulty, position: key, collisions } })
+    onProgress?.({ status: 'started', score: 30 + nextStars.length * 20, currentPhase: 'maze-progress', currentLevel: nextStars.length + 1, maxLevel, meta: { difficulty, theme: round.theme, position: key, collisions } })
   }
 
   const reset = () => {
@@ -719,7 +924,23 @@ function MazeGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGameProps
     setCollisions(0)
     setStars([])
     setMessage('Colete estrelas e encontre a saida brilhante.')
-    onProgress?.({ status: 'started', score: 0, currentPhase: 'maze-reset', currentLevel: 1, maxLevel, attemptDelta: 1, meta: { difficulty } })
+    onProgress?.({ status: 'started', score: 0, currentPhase: 'maze-reset', currentLevel: 1, maxLevel, attemptDelta: 1, meta: { difficulty, theme: round.theme } })
+  }
+
+  const nextRound = () => {
+    const nextIndex = nextRoundIndex(roundIndex, mazeRounds.length)
+    setRoundIndex(nextIndex)
+    setPosition([0, 0])
+    setCollisions(0)
+    setStars([])
+    setMessage(`Nova missão: ${mazeRounds[nextIndex].theme}.`)
+    onProgress?.({ status: 'started', score: 0, currentPhase: 'new-maze-round', currentLevel: 1, maxLevel: mazeRounds[nextIndex].stars.length + 1, attemptDelta: 1, meta: { difficulty, theme: mazeRounds[nextIndex].theme } })
+  }
+
+  const expireRound = () => {
+    if (position[0] === Number(goal[0]) && position[1] === Number(goal[2])) return
+    setMessage('O tempo acabou! Tente uma nova rota espacial.')
+    onProgress?.({ status: 'started', score: Math.max(5, stars.length * 20), currentPhase: 'time-expired', currentLevel: stars.length + 1, maxLevel, meta: { difficulty, theme: round.theme, collisions } })
   }
 
   const moveFromKeyboard = useEffectEvent((event: KeyboardEvent) => {
@@ -757,12 +978,13 @@ function MazeGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGameProps
       <CardHeader className="p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle className="text-2xl sm:text-3xl">Labirinto do foguete</CardTitle>
-          <Pill tone="aqua">{`${stars.length}/2 estrelas`}</Pill>
+          <Pill tone="aqua">{round.theme}</Pill>
         </div>
         <CardDescription>Use os botoes para mover o foguete pela trilha segura ate a estrela final.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5 p-5 pt-0 sm:p-6 sm:pt-0">
         <ControlHint touch="toque nas casas vizinhas ou nos botoes" keyboard={['Setas', 'WASD']} difficulty={difficulty} />
+        <TimerPanel key={`${difficulty}-${roundIndex}`} difficulty={difficulty} onExpire={expireRound} />
 
         <ProgressStrip value={((stars.length + (position[0] === 4 && position[1] === 4 ? 1 : 0)) / 3) * 100} />
 
@@ -807,7 +1029,10 @@ function MazeGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGameProps
           <div />
         </div>
         <div className="rounded-[24px] bg-white/85 p-4">
-          <GameStatus>{`Colisoes: ${collisions}. ${message}`}</GameStatus>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <GameStatus>{`Estrelas: ${stars.length}/${starCells.length}. Colisoes: ${collisions}. ${message}`}</GameStatus>
+            <Button variant="secondary" size="sm" onClick={nextRound}>Nova rodada</Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -818,6 +1043,7 @@ function ConnectDotsGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGa
   const points = CONNECT_DOT_POINTS.slice(0, difficulty === 'easy' ? 8 : difficulty === 'medium' ? 12 : 16)
   const [nextExpected, setNextExpected] = useState(1)
   const [mistakes, setMistakes] = useState(0)
+  const [roundId, setRoundId] = useState(0)
   const reportProgress = useEffectEvent((payload: ProgressPayload) => {
     onProgress?.(payload)
   })
@@ -850,7 +1076,13 @@ function ConnectDotsGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGa
   const reset = () => {
     setNextExpected(1)
     setMistakes(0)
+    setRoundId((current) => current + 1)
     onProgress?.({ status: 'started', score: 0, currentPhase: 'connect-reset', currentLevel: 1, maxLevel: points.length, attemptDelta: 1, meta: { difficulty } })
+  }
+
+  const expireRound = () => {
+    if (nextExpected > points.length) return
+    onProgress?.({ status: 'started', score: Math.max(5, nextExpected * 5), currentPhase: 'time-expired', currentLevel: nextExpected, maxLevel: points.length, meta: { difficulty, mistakes } })
   }
 
   const clickFromKeyboard = useEffectEvent((event: KeyboardEvent) => {
@@ -885,6 +1117,7 @@ function ConnectDotsGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGa
       </CardHeader>
       <CardContent className="space-y-5 p-5 pt-0 sm:p-6 sm:pt-0">
         <ControlHint touch="toque nos numeros em ordem" keyboard={['1-9', 'Enter']} difficulty={difficulty} />
+        <TimerPanel key={`${difficulty}-${roundId}`} difficulty={difficulty} onExpire={expireRound} />
 
         <ProgressStrip value={(Math.min(nextExpected - 1, points.length) / points.length) * 100} tone="coral" />
 
@@ -914,6 +1147,266 @@ function ConnectDotsGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGa
           <Button variant="secondary" size="sm" onClick={reset}>
             <RefreshCw className="h-4 w-4" /> Recomeçar
           </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+export function QuizGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGameProps) {
+  const [roundIndex, setRoundIndex] = useState(0)
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [score, setScore] = useState(0)
+  const [message, setMessage] = useState('Escolha a resposta que combina com a pergunta.')
+  const round = quizRounds[roundIndex % quizRounds.length]
+  const questions = round.questions.slice(0, difficulty === 'easy' ? 2 : 3)
+  const reportProgress = useEffectEvent((payload: ProgressPayload) => {
+    onProgress?.(payload)
+  })
+
+  useEffect(() => {
+    reportProgress({ status: 'started', score: 0, currentPhase: 'quiz-start', currentLevel: 1, maxLevel: questions.length, attemptDelta: 1, meta: { difficulty, theme: round.theme } })
+  }, [difficulty, questions.length, round.theme])
+
+  const answer = (option: string) => {
+    const question = questions[currentQuestion]
+    const correct = option === question.answer
+    const nextScore = score + (correct ? 1 : 0)
+    setScore(nextScore)
+
+    if (currentQuestion + 1 >= questions.length) {
+      const finalScore = Math.round((nextScore / questions.length) * 100)
+      setMessage(correct ? 'Quiz completo com brilho!' : 'Quiz completo. Vale tentar outra rodada!')
+      onProgress?.({ status: 'completed', score: finalScore, currentPhase: 'quiz-complete', currentLevel: questions.length, maxLevel: questions.length, successDelta: finalScore >= 70 ? 1 : 0, meta: { difficulty, theme: round.theme } })
+      onComplete(finalScore)
+      return
+    }
+
+    setMessage(correct ? 'Acertou! Próxima pergunta.' : `Quase! A resposta era ${question.answer}.`)
+    setCurrentQuestion((current) => current + 1)
+    onProgress?.({ status: 'started', score: Math.round((nextScore / questions.length) * 100), currentPhase: correct ? 'quiz-hit' : 'quiz-miss', currentLevel: currentQuestion + 2, maxLevel: questions.length, meta: { difficulty, theme: round.theme } })
+  }
+
+  const nextRound = () => {
+    setRoundIndex((current) => nextRoundIndex(current, quizRounds.length))
+    setCurrentQuestion(0)
+    setScore(0)
+    setMessage('Nova rodada de perguntas!')
+  }
+
+  const expireRound = () => {
+    setMessage('O tempo acabou! Comece outra rodada de quiz.')
+    onProgress?.({ status: 'started', score: Math.round((score / questions.length) * 100), currentPhase: 'time-expired', currentLevel: currentQuestion + 1, maxLevel: questions.length, meta: { difficulty, theme: round.theme } })
+  }
+
+  const question = questions[currentQuestion]
+
+  return (
+    <Card className="print-card overflow-hidden bg-gradient-to-br from-white via-sky/15 to-sun/20">
+      <CardHeader className="p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <CardTitle className="text-2xl sm:text-3xl">Quiz relampago</CardTitle>
+          <Pill tone="aqua">{round.theme}</Pill>
+        </div>
+        <CardDescription>Leia a pergunta, toque na resposta e avance por uma rodada curtinha.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-5 p-5 pt-0 sm:p-6 sm:pt-0">
+        <ControlHint touch="toque na resposta" keyboard={['Tab', 'Enter']} difficulty={difficulty} />
+        <TimerPanel key={`${difficulty}-${roundIndex}`} difficulty={difficulty} onExpire={expireRound} seconds={difficulty === 'medium' ? 60 : timeLimits[difficulty]} />
+        <ProgressStrip value={(currentQuestion / questions.length) * 100} />
+        <div className="rounded-[28px] bg-white/85 p-5 shadow-inner">
+          <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-muted-ink">Pergunta {currentQuestion + 1}/{questions.length}</p>
+          <p className="mt-3 font-display text-3xl font-extrabold text-ink">{question.prompt}</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {question.options.map((option) => (
+            <button key={option} type="button" onClick={() => answer(option)} className="touch-manipulation rounded-[24px] bg-white px-4 py-5 text-lg font-extrabold text-ink shadow-sm transition active:scale-95 hover:bg-sand">
+              {option}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] bg-white/85 p-4">
+          <GameStatus>{message}</GameStatus>
+          <Button variant="secondary" size="sm" onClick={nextRound}>Nova rodada</Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+export function MathStarsGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGameProps) {
+  const [roundIndex, setRoundIndex] = useState(0)
+  const [currentProblem, setCurrentProblem] = useState(0)
+  const [hits, setHits] = useState(0)
+  const [message, setMessage] = useState('Conte os itens e escolha o numero certo.')
+  const round = mathRounds[roundIndex % mathRounds.length]
+  const problems = round.problems
+  const maxOption = difficulty === 'challenge' ? 9 : 7
+  const reportProgress = useEffectEvent((payload: ProgressPayload) => {
+    onProgress?.(payload)
+  })
+
+  useEffect(() => {
+    reportProgress({ status: 'started', score: 0, currentPhase: 'math-start', currentLevel: 1, maxLevel: problems.length, attemptDelta: 1, meta: { difficulty, theme: round.theme } })
+  }, [difficulty, problems.length, round.theme])
+
+  const choose = (value: number) => {
+    const problem = problems[currentProblem]
+    const correct = value === problem.answer
+    const nextHits = hits + (correct ? 1 : 0)
+    setHits(nextHits)
+
+    if (currentProblem + 1 >= problems.length) {
+      const finalScore = Math.round((nextHits / problems.length) * 100)
+      setMessage('Rodada de continhas completa!')
+      onProgress?.({ status: 'completed', score: finalScore, currentPhase: 'math-complete', currentLevel: problems.length, maxLevel: problems.length, successDelta: finalScore >= 70 ? 1 : 0, meta: { difficulty, theme: round.theme } })
+      onComplete(finalScore)
+      return
+    }
+
+    setMessage(correct ? 'Boa conta! Mais uma.' : `Quase! O resultado era ${problem.answer}.`)
+    setCurrentProblem((current) => current + 1)
+    onProgress?.({ status: 'started', score: Math.round((nextHits / problems.length) * 100), currentPhase: correct ? 'math-hit' : 'math-miss', currentLevel: currentProblem + 2, maxLevel: problems.length, meta: { difficulty, theme: round.theme } })
+  }
+
+  const nextRound = () => {
+    setRoundIndex((current) => nextRoundIndex(current, mathRounds.length))
+    setCurrentProblem(0)
+    setHits(0)
+    setMessage('Nova rodada de continhas!')
+  }
+
+  const expireRound = () => {
+    setMessage('O tempo acabou! Faça outra rodada com calma.')
+    onProgress?.({ status: 'started', score: Math.round((hits / problems.length) * 100), currentPhase: 'time-expired', currentLevel: currentProblem + 1, maxLevel: problems.length, meta: { difficulty, theme: round.theme } })
+  }
+
+  const problem = problems[currentProblem]
+
+  return (
+    <Card className="print-card overflow-hidden bg-gradient-to-br from-white via-sand to-aqua/15">
+      <CardHeader className="p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <CardTitle className="text-2xl sm:text-3xl">Conta estrelinhas</CardTitle>
+          <Pill tone="sun">{round.theme}</Pill>
+        </div>
+        <CardDescription>Resolva continhas simples com apoio visual e resposta grande para tocar.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-5 p-5 pt-0 sm:p-6 sm:pt-0">
+        <ControlHint touch="toque no resultado" keyboard={['Tab', 'Enter']} difficulty={difficulty} />
+        <TimerPanel key={`${difficulty}-${roundIndex}`} difficulty={difficulty} onExpire={expireRound} seconds={difficulty === 'medium' ? 75 : timeLimits[difficulty]} />
+        <ProgressStrip value={(currentProblem / problems.length) * 100} tone="sun" />
+        <div className="rounded-[28px] bg-white/85 p-5 text-center shadow-inner">
+          <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-muted-ink">Problema {currentProblem + 1}/{problems.length}</p>
+          <p className="mt-3 font-display text-5xl font-extrabold text-ink">{problem.prompt}</p>
+          <p className="mt-3 text-4xl">{Array.from({ length: problem.answer }).map((_, index) => <span key={index}>{round.items}</span>)}</p>
+        </div>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+          {Array.from({ length: maxOption }, (_, index) => index + 1).map((value) => (
+            <button key={value} type="button" onClick={() => choose(value)} className="touch-manipulation rounded-[22px] bg-white px-4 py-4 font-display text-2xl font-extrabold text-ink shadow-sm transition active:scale-95 hover:bg-sand">
+              {value}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] bg-white/85 p-4">
+          <GameStatus>{message}</GameStatus>
+          <Button variant="secondary" size="sm" onClick={nextRound}>Nova rodada</Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+export function SyllableGame({ onComplete, onProgress, difficulty = 'easy' }: MiniGameProps) {
+  const [roundIndex, setRoundIndex] = useState(0)
+  const [currentWord, setCurrentWord] = useState(0)
+  const [picked, setPicked] = useState<string[]>([])
+  const [hits, setHits] = useState(0)
+  const [message, setMessage] = useState('Monte a palavra tocando nas silabas em ordem.')
+  const round = syllableRounds[roundIndex % syllableRounds.length]
+  const words = round.words.slice(0, difficulty === 'easy' ? 2 : 3)
+  const word = words[currentWord]
+  const options = useMemo(() => shuffle([...word.syllables, ...(difficulty === 'challenge' ? ['LA', 'MI'] : [])]), [difficulty, word])
+  const reportProgress = useEffectEvent((payload: ProgressPayload) => {
+    onProgress?.(payload)
+  })
+
+  useEffect(() => {
+    reportProgress({ status: 'started', score: 0, currentPhase: 'syllable-start', currentLevel: 1, maxLevel: words.length, attemptDelta: 1, meta: { difficulty, theme: round.theme } })
+  }, [difficulty, round.theme, words.length])
+
+  const choose = (syllable: string) => {
+    const expected = word.syllables[picked.length]
+    if (syllable !== expected) {
+      setMessage(`Quase! A próxima sílaba era ${expected}.`)
+      setPicked([])
+      onProgress?.({ status: 'started', score: Math.round((hits / words.length) * 100), currentPhase: 'syllable-miss', currentLevel: currentWord + 1, maxLevel: words.length, meta: { difficulty, theme: round.theme } })
+      return
+    }
+
+    const nextPicked = [...picked, syllable]
+    setPicked(nextPicked)
+    if (nextPicked.length < word.syllables.length) {
+      setMessage('Boa! Continue a palavra.')
+      return
+    }
+
+    const nextHits = hits + 1
+    setHits(nextHits)
+    setPicked([])
+    if (currentWord + 1 >= words.length) {
+      const finalScore = Math.round((nextHits / words.length) * 100)
+      setMessage('Palavras montadas!')
+      onProgress?.({ status: 'completed', score: finalScore, currentPhase: 'syllable-complete', currentLevel: words.length, maxLevel: words.length, successDelta: finalScore >= 70 ? 1 : 0, meta: { difficulty, theme: round.theme } })
+      onComplete(finalScore)
+      return
+    }
+
+    setCurrentWord((current) => current + 1)
+    setMessage('Palavra formada! Próxima.')
+  }
+
+  const nextRound = () => {
+    setRoundIndex((current) => nextRoundIndex(current, syllableRounds.length))
+    setCurrentWord(0)
+    setPicked([])
+    setHits(0)
+    setMessage('Nova rodada de silabas!')
+  }
+
+  const expireRound = () => {
+    setMessage('O tempo acabou! Tente montar outra palavra.')
+    onProgress?.({ status: 'started', score: Math.round((hits / words.length) * 100), currentPhase: 'time-expired', currentLevel: currentWord + 1, maxLevel: words.length, meta: { difficulty, theme: round.theme } })
+  }
+
+  return (
+    <Card className="print-card overflow-hidden bg-gradient-to-br from-white via-mint to-coral/10">
+      <CardHeader className="p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <CardTitle className="text-2xl sm:text-3xl">Arrume as silabas</CardTitle>
+          <Pill tone="aqua">{round.theme}</Pill>
+        </div>
+        <CardDescription>Toque nas silabas em ordem para formar palavras curtas.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-5 p-5 pt-0 sm:p-6 sm:pt-0">
+        <ControlHint touch="toque nas silabas" keyboard={['Tab', 'Enter']} difficulty={difficulty} />
+        <TimerPanel key={`${difficulty}-${roundIndex}`} difficulty={difficulty} onExpire={expireRound} seconds={difficulty === 'medium' ? 75 : timeLimits[difficulty]} />
+        <ProgressStrip value={(currentWord / words.length) * 100} />
+        <div className="rounded-[28px] bg-white/85 p-5 text-center shadow-inner">
+          <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-muted-ink">Palavra {currentWord + 1}/{words.length}</p>
+          <p className="mt-3 font-display text-5xl font-extrabold tracking-[0.12em] text-ink">{word.word}</p>
+          <p className="mt-3 text-sm font-bold text-muted-ink">Montado: {picked.length > 0 ? picked.join('-') : '...'}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {options.map((syllable, index) => (
+            <button key={`${syllable}-${index}`} type="button" onClick={() => choose(syllable)} className="touch-manipulation rounded-[24px] bg-white px-4 py-5 font-display text-2xl font-extrabold text-ink shadow-sm transition active:scale-95 hover:bg-sand">
+              {syllable}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] bg-white/85 p-4">
+          <GameStatus>{message}</GameStatus>
+          <Button variant="secondary" size="sm" onClick={nextRound}>Nova rodada</Button>
         </div>
       </CardContent>
     </Card>

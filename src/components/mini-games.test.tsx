@@ -1,8 +1,12 @@
-import { render, screen } from '@testing-library/react'
+import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { MemoryGame, TicTacToeGame, WorksheetGame } from './mini-games'
+import { MathStarsGame, MemoryGame, QuizGame, SyllableGame, TicTacToeGame, WorksheetGame } from './mini-games'
+
+afterEach(() => {
+  cleanup()
+})
 
 describe('WorksheetGame', () => {
   it('completes the word search online flow when all words are marked', async () => {
@@ -41,6 +45,18 @@ describe('WorksheetGame', () => {
     expect(screen.getByRole('button', { name: '16' })).toBeInTheDocument()
   })
 
+  it('starts a different word search round with new words', async () => {
+    const user = userEvent.setup()
+
+    render(<WorksheetGame difficulty="medium" slug="caca-palavras-da-fazenda" onComplete={vi.fn()} />)
+
+    expect(screen.getByText(/Fazenda feliz/i)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Nova rodada/i }))
+
+    expect(screen.getByText(/Praia ensolarada/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'SOL' })).toBeInTheDocument()
+  })
+
   it('moves the maze rocket with arrow keys', async () => {
     const user = userEvent.setup()
 
@@ -67,5 +83,55 @@ describe('Mini game difficulty and keyboard controls', () => {
     render(<MemoryGame difficulty="challenge" onComplete={vi.fn()} />)
 
     expect(screen.getAllByRole('button', { name: /^Carta \d+$/i })).toHaveLength(16)
+  })
+
+  it('starts a memory round with a new theme', async () => {
+    const user = userEvent.setup()
+
+    render(<MemoryGame difficulty="easy" onComplete={vi.fn()} />)
+
+    expect(screen.getAllByText(/Bichinhos da floresta/i).length).toBeGreaterThan(0)
+    await user.click(screen.getByRole('button', { name: /Nova rodada/i }))
+
+    expect(screen.getAllByText(/Festa no espaço/i).length).toBeGreaterThan(0)
+  })
+
+  it('completes the quiz game with real answers', async () => {
+    const user = userEvent.setup()
+    const onComplete = vi.fn()
+
+    render(<QuizGame difficulty="easy" onComplete={onComplete} />)
+
+    await user.click(screen.getByRole('button', { name: 'Cachorro' }))
+    await user.click(screen.getByRole('button', { name: 'Baleia' }))
+
+    expect(onComplete).toHaveBeenCalledWith(100)
+  })
+
+  it('completes the math stars game', async () => {
+    const user = userEvent.setup()
+    const onComplete = vi.fn()
+
+    render(<MathStarsGame difficulty="easy" onComplete={onComplete} />)
+
+    await user.click(screen.getByRole('button', { name: '3' }))
+    await user.click(screen.getByRole('button', { name: '5' }))
+    await user.click(screen.getByRole('button', { name: '3' }))
+
+    expect(onComplete).toHaveBeenCalledWith(100)
+  })
+
+  it('completes the syllable game', async () => {
+    const user = userEvent.setup()
+    const onComplete = vi.fn()
+
+    render(<SyllableGame difficulty="easy" onComplete={onComplete} />)
+
+    await user.click(screen.getByRole('button', { name: 'GA' }))
+    await user.click(screen.getByRole('button', { name: 'TO' }))
+    await user.click(screen.getByRole('button', { name: 'PA' }))
+    await user.click(screen.getByRole('button', { name: 'TO' }))
+
+    expect(onComplete).toHaveBeenCalledWith(100)
   })
 })
