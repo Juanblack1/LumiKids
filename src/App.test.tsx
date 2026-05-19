@@ -10,6 +10,11 @@ const sessionLogged = {
   favorites: [],
   progress: [],
 }
+const guardianSession = {
+  user: { id: 'g1', name: 'Familia Sol', role: 'guardian', ageRange: 'responsavel', avatar: '🌟' },
+  favorites: [],
+  progress: [],
+}
 
 const categories = [
   { slug: 'jogos', title: 'Jogos', description: 'Jogos divertidos.', route: '/games', ageRange: '4-9 anos', itemsCount: 3, printable: true, highlight: 'online', tone: 'coral' },
@@ -52,7 +57,18 @@ describe('App integration', () => {
         return new Response(JSON.stringify({ printables }), { status: 200, headers: { 'Content-Type': 'application/json' } })
       }
       if (url.endsWith('/api/auth/login') && method === 'POST') {
-        return new Response(JSON.stringify(sessionLogged), { status: 200, headers: { 'Content-Type': 'application/json' } })
+        const body = JSON.parse(String(init?.body ?? '{}')) as { role?: string }
+        return new Response(JSON.stringify(body.role === 'guardian' ? guardianSession : sessionLogged), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      }
+      if (url.endsWith('/api/guardian/child-activity')) {
+        return new Response(
+          JSON.stringify({
+            child: sessionLogged.user,
+            favorites: [{ itemKind: 'story', itemSlug: 'o-jardim-da-lua' }],
+            progress: [{ itemKind: 'game', itemSlug: 'memoria-dos-animais', status: 'completed', score: 94, bestScore: 94, updatedAt: new Date().toISOString(), attemptCount: 2 }],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        )
       }
       if (url.endsWith('/api/auth/logout') && method === 'POST') {
         return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } })
@@ -78,12 +94,23 @@ describe('App integration', () => {
 
     expect(await screen.findByRole('heading', { name: /Escolha um mundo para brincar agora/i })).toBeInTheDocument()
 
-    const nav = screen.getByRole('navigation')
-    await user.click(nav.querySelector('a[href="/games"]') as HTMLAnchorElement)
+    await user.click(screen.getAllByRole('link', { name: /Jogos/i })[0])
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /Mini games educativos com instrucoes simples/i })).toBeInTheDocument()
     })
     expect(screen.getByText(/Memoria dos animais/i)).toBeInTheDocument()
+  })
+
+  it('shows a guardian dashboard with child activity', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(await screen.findByRole('button', { name: /Responsavel/i }))
+    await user.click(screen.getByRole('button', { name: 'Entrar' }))
+
+    expect(await screen.findByRole('heading', { name: /Atividade da Luna/i })).toBeInTheDocument()
+    expect(screen.getAllByText(/Memoria dos animais/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/O jardim da Lua/i).length).toBeGreaterThan(0)
   })
 })

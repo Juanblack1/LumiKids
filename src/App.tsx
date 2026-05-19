@@ -1,11 +1,16 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
+  Activity,
   BookHeart,
   BookOpen,
   Brain,
+  ChevronRight,
+  Gamepad2,
   Heart,
   Home,
   LogOut,
+  Medal,
+  NotebookTabs,
   Palette,
   Printer,
   Rocket,
@@ -33,9 +38,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { MemoryGame, SequenceGame, TicTacToeGame, WorksheetGame } from '@/components/mini-games'
+import { MemoryGame, SequenceGame, TicTacToeGame, WorksheetGame, type GameDifficulty } from '@/components/mini-games'
 import {
   getCatalog,
+  getChildActivity,
   getGames,
   getPrintables,
   getSession,
@@ -48,6 +54,7 @@ import {
 import { cn } from '@/lib/utils'
 import type {
   CatalogCategory,
+  ChildActivityPayload,
   FavoriteKind,
   Game,
   Printable,
@@ -63,6 +70,7 @@ type AppContextValue = {
   stories: Story[]
   games: Game[]
   printables: Printable[]
+  childActivity: ChildActivityPayload | null
   loginAction: (input: { email: string; password: string; role: string }) => Promise<boolean>
   logoutAction: () => Promise<void>
   favoriteSet: Set<string>
@@ -100,6 +108,12 @@ const toneMap: Record<CatalogCategory['tone'] | Story['coverTone'] | Printable['
 }
 
 const brandLogo = '/ai-assets/logo-alt.png'
+
+const gameDifficultyOptions: Array<{ key: GameDifficulty; label: string; body: string }> = [
+  { key: 'easy', label: 'Facil', body: 'menos itens, caminho mais aberto e ritmo tranquilo' },
+  { key: 'medium', label: 'Medio', body: 'mais foco, mais etapas e pontuacao equilibrada' },
+  { key: 'challenge', label: 'Desafio', body: 'mais fases, atalhos de teclado e pontuacao exigente' },
+]
 
 const categoryArtMap: Record<string, string> = {
   jogos: '/ai-assets/game-tictactoe.png',
@@ -187,6 +201,7 @@ function AppProvider({ children }: { children: ReactNode }) {
   const [stories, setStories] = useState<Story[]>([])
   const [games, setGames] = useState<Game[]>([])
   const [printables, setPrintables] = useState<Printable[]>([])
+  const [childActivity, setChildActivity] = useState<ChildActivityPayload | null>(null)
 
   const load = async () => {
     setLoading(true)
@@ -205,6 +220,11 @@ function AppProvider({ children }: { children: ReactNode }) {
       setStories(storyPayload.stories)
       setGames(gamePayload.games)
       setPrintables(printablePayload.printables)
+      if (sessionPayload.user?.role === 'guardian') {
+        setChildActivity(await getChildActivity())
+      } else {
+        setChildActivity(null)
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Falha ao carregar a plataforma.'
       toast.error(message)
@@ -231,6 +251,11 @@ function AppProvider({ children }: { children: ReactNode }) {
     try {
       const nextSession = await login(input)
       setSession(nextSession)
+      if (nextSession.user?.role === 'guardian') {
+        setChildActivity(await getChildActivity())
+      } else {
+        setChildActivity(null)
+      }
       toast.success(`Ola, ${nextSession.user?.name ?? 'visitante'}!`)
       return true
     } catch (error) {
@@ -242,6 +267,7 @@ function AppProvider({ children }: { children: ReactNode }) {
   const logoutAction = useCallback(async () => {
     await logout()
     setSession(emptySession)
+    setChildActivity(null)
     toast.success('Sessao encerrada com seguranca.')
   }, [])
 
@@ -289,6 +315,7 @@ function AppProvider({ children }: { children: ReactNode }) {
       stories,
       games,
       printables,
+      childActivity,
       loginAction,
       logoutAction,
       favoriteSet,
@@ -296,7 +323,7 @@ function AppProvider({ children }: { children: ReactNode }) {
       toggleFavoriteAction,
       recordProgressAction,
     }),
-    [categories, favoriteSet, games, loading, loginAction, logoutAction, printables, progressMap, recordProgressAction, session, stories, toggleFavoriteAction],
+    [categories, childActivity, favoriteSet, games, loading, loginAction, logoutAction, printables, progressMap, recordProgressAction, session, stories, toggleFavoriteAction],
   )
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>
@@ -316,29 +343,34 @@ function AppShell({ children }: { children: ReactNode }) {
     { href: '/games', label: 'Jogos', icon: Rocket },
     { href: '/stories', label: 'Historias', icon: BookOpen },
     { href: '/printables', label: 'Imprimir', icon: Printer },
+    ...(session.user?.role === 'guardian' ? [{ href: '/guardian', label: 'Painel', icon: NotebookTabs }] : []),
   ]
 
+  const mobileNavItems = session.user?.role === 'guardian'
+    ? [navItems[1], navItems[2], navItems[3], navItems[4], navItems[5]]
+    : navItems.slice(0, 5)
+  const visibleMobileNavItems = mobileNavItems.filter((item): item is (typeof navItems)[number] => Boolean(item))
+
   return (
-    <div className="min-h-screen">
-      <header className="no-print sticky top-0 z-20 border-b border-white/60 bg-white/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex items-center gap-3">
-            <img src={brandLogo} alt="Logo LumiKids" className="h-12 w-12 rounded-[18px] object-cover shadow-sm" />
+    <div className="min-h-screen pb-24 md:pb-0">
+      <header className="no-print sticky top-0 z-30 border-b border-white/70 bg-cream/88 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+          <Link to="/" className="flex min-w-0 items-center gap-3">
+            <img src={brandLogo} alt="Logo LumiKids" className="h-11 w-11 shrink-0 rounded-[18px] object-cover shadow-sm" />
             <div>
-              <p className="font-display text-2xl font-extrabold text-coral">LumiKids</p>
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-muted-ink">brincar, ler e imprimir</p>
+              <p className="font-display text-xl font-extrabold leading-none text-coral sm:text-2xl">LumiKids</p>
+              <p className="hidden text-[0.66rem] font-bold uppercase tracking-[0.16em] text-muted-ink sm:block">brincar, ler e imprimir</p>
             </div>
           </Link>
 
-          <nav className="grid w-full grid-cols-2 gap-2 rounded-[30px] border border-white/80 bg-white/90 px-2 py-2 shadow-sm sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:rounded-full">
-            {navItems.map(({ href, label, icon: Icon }, index) => (
+          <nav className="hidden items-center gap-1 rounded-full border border-white/80 bg-white/90 px-2 py-2 shadow-sm md:flex">
+            {navItems.map(({ href, label, icon: Icon }) => (
               <NavLink
                 key={href}
                 to={href}
                 className={({ isActive }) =>
                   cn(
-                    'inline-flex w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold transition sm:w-auto',
-                    index === navItems.length - 1 && 'col-span-2 sm:col-auto',
+                    'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold transition',
                     isActive
                       ? 'bg-ink text-white shadow-[0_10px_25px_rgba(25,50,60,0.18)]'
                       : 'text-ink hover:bg-sand',
@@ -353,13 +385,13 @@ function AppShell({ children }: { children: ReactNode }) {
 
           <div className="flex items-center gap-3">
             {session.user ? (
-              <div className="flex items-center gap-3 rounded-full border border-white/80 bg-white/95 px-4 py-2 shadow-sm">
+              <div className="flex items-center gap-2 rounded-full border border-white/80 bg-white/95 px-2.5 py-2 shadow-sm sm:gap-3 sm:px-4">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sand text-lg">{session.user.avatar}</span>
                 <div className="hidden text-left sm:block">
                   <p className="text-sm font-extrabold text-ink">{session.user.name}</p>
                   <p className="text-xs font-bold uppercase tracking-[0.16em] text-muted-ink">{session.user.role === 'child' ? 'perfil infantil' : 'responsavel'}</p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => void logoutAction()}>
+                <Button aria-label="Sair" variant="ghost" size="sm" onClick={() => void logoutAction()}>
                   <LogOut className="h-4 w-4" />
                 </Button>
               </div>
@@ -371,6 +403,24 @@ function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
+
+      <nav className="no-print fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-[28px] border border-white/80 bg-white/92 p-2 shadow-[0_18px_60px_rgba(25,50,60,0.20)] backdrop-blur-xl md:hidden">
+        {visibleMobileNavItems.map(({ href, label, icon: Icon }) => (
+          <NavLink
+            key={href}
+            to={href}
+            className={({ isActive }) =>
+              cn(
+                'flex min-h-14 flex-col items-center justify-center gap-1 rounded-[22px] px-1 text-[0.66rem] font-extrabold transition',
+                isActive ? 'bg-ink text-white' : 'text-muted-ink hover:bg-sand',
+              )
+            }
+          >
+            <Icon className="h-4 w-4" />
+            <span className="max-w-full truncate">{label}</span>
+          </NavLink>
+        ))}
+      </nav>
 
       <main>{children}</main>
 
@@ -406,7 +456,7 @@ function SectionTitle({ eyebrow, title, body }: { eyebrow: string; title: string
   return (
     <div className="max-w-3xl space-y-3">
       <p className="text-sm font-bold uppercase tracking-[0.18em] text-aqua">{eyebrow}</p>
-      <h2 className="font-display text-4xl font-extrabold text-ink sm:text-5xl">{title}</h2>
+      <h2 className="font-display text-3xl font-extrabold leading-tight text-ink sm:text-5xl">{title}</h2>
       <p className="text-base leading-7 text-muted-ink sm:text-lg">{body}</p>
     </div>
   )
@@ -418,7 +468,7 @@ function FavoriteButton({ active, onClick }: { active: boolean; onClick: () => v
       type="button"
       onClick={onClick}
       className={cn(
-        'rounded-full border px-3 py-2 transition',
+        'rounded-full border px-3 py-2 transition active:scale-95',
         active ? 'border-coral bg-coral text-white' : 'border-soft-border bg-white text-muted-ink hover:border-coral hover:text-coral',
       )}
       aria-label={active ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
@@ -435,10 +485,10 @@ function CategoryCard({ category }: { category: CatalogCategory }) {
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
       <Link to={category.route}>
-        <Card className={cn('h-full bg-gradient-to-br', toneMap[category.tone])}>
-          <CardHeader className="gap-4">
+        <Card className={cn('h-full overflow-hidden bg-gradient-to-br transition hover:-translate-y-0.5 hover:shadow-[0_24px_70px_rgba(25,50,60,0.12)]', toneMap[category.tone])}>
+          <CardHeader className="gap-3 p-4 sm:gap-4 sm:p-6">
             <div className="overflow-hidden rounded-[22px] border border-white/70 bg-white/70">
-              <img src={image} alt={`Ilustracao da categoria ${category.title}`} className="h-40 w-full object-cover" />
+              <img src={image} alt={`Ilustracao da categoria ${category.title}`} className="h-32 w-full object-cover sm:h-40" />
             </div>
             <div className="flex items-center justify-between gap-3">
               <span className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/80 text-ink shadow-sm">
@@ -447,11 +497,11 @@ function CategoryCard({ category }: { category: CatalogCategory }) {
               <Badge className="border-white/70 bg-white/70 text-[10px] text-muted-ink">{category.ageRange}</Badge>
             </div>
             <div>
-              <CardTitle className="text-[1.6rem] leading-tight">{category.title}</CardTitle>
+              <CardTitle className="text-[1.35rem] leading-tight sm:text-[1.6rem]">{category.title}</CardTitle>
               <CardDescription className="mt-2 text-sm">{category.description}</CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="flex items-center justify-between text-sm font-bold text-muted-ink">
+          <CardContent className="flex items-center justify-between px-4 pb-4 text-sm font-bold text-muted-ink sm:px-6 sm:pb-6">
             <span>{category.itemsCount} experiencias</span>
             <span>{category.printable ? 'online + A4' : 'digital'}</span>
           </CardContent>
@@ -468,10 +518,10 @@ function StoryCard({ story }: { story: Story }) {
   const image = storyArtMap[story.slug] ?? '/ai-assets/story-library.png'
 
   return (
-    <Card className={cn('h-full bg-gradient-to-br', toneMap[story.coverTone])}>
-      <CardHeader className="gap-4">
+    <Card className={cn('h-full overflow-hidden bg-gradient-to-br transition hover:-translate-y-0.5 hover:shadow-[0_24px_70px_rgba(25,50,60,0.12)]', toneMap[story.coverTone])}>
+      <CardHeader className="gap-3 p-4 sm:gap-4 sm:p-6">
         <div className="overflow-hidden rounded-[22px] border border-white/70 bg-white/70">
-          <img src={image} alt={`Capa ilustrada da historia ${story.title}`} className="h-40 w-full object-cover" />
+          <img src={image} alt={`Capa ilustrada da historia ${story.title}`} className="h-32 w-full object-cover sm:h-40" />
         </div>
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-2">
@@ -481,11 +531,11 @@ function StoryCard({ story }: { story: Story }) {
           <FavoriteButton active={favoriteSet.has(favoriteKey)} onClick={() => void toggleFavoriteAction('story', story.slug)} />
         </div>
         <div>
-          <CardTitle className="text-[1.55rem] leading-tight">{story.title}</CardTitle>
+          <CardTitle className="text-[1.32rem] leading-tight sm:text-[1.55rem]">{story.title}</CardTitle>
           <CardDescription className="mt-2">{story.blurb}</CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-4 pb-4 sm:px-6 sm:pb-6">
         <div className="flex flex-wrap gap-2">
           {story.tags.slice(0, 3).map((tag) => (
             <Badge key={tag} className="bg-white/75 text-[10px] text-muted-ink">
@@ -511,10 +561,10 @@ function GameCard({ game }: { game: Game }) {
   const image = gameArtMap[game.slug] ?? '/ai-assets/game-tictactoe.png'
 
   return (
-    <Card className={cn('h-full bg-gradient-to-br', toneMap[game.coverTone])}>
-      <CardHeader className="gap-4">
+    <Card className={cn('h-full overflow-hidden bg-gradient-to-br transition hover:-translate-y-0.5 hover:shadow-[0_24px_70px_rgba(25,50,60,0.12)]', toneMap[game.coverTone])}>
+      <CardHeader className="gap-3 p-4 sm:gap-4 sm:p-6">
         <div className="overflow-hidden rounded-[22px] border border-white/70 bg-white/70">
-          <img src={image} alt={`Thumbnail ilustrada do jogo ${game.title}`} className="h-40 w-full object-cover" />
+          <img src={image} alt={`Thumbnail ilustrada do jogo ${game.title}`} className="h-32 w-full object-cover sm:h-40" />
         </div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-wrap gap-2">
@@ -524,11 +574,11 @@ function GameCard({ game }: { game: Game }) {
           <FavoriteButton active={favoriteSet.has(favoriteKey)} onClick={() => void toggleFavoriteAction('game', game.slug)} />
         </div>
         <div>
-          <CardTitle className="text-[1.55rem] leading-tight">{game.title}</CardTitle>
+          <CardTitle className="text-[1.32rem] leading-tight sm:text-[1.55rem]">{game.title}</CardTitle>
           <CardDescription className="mt-2">{game.description}</CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-4 pb-4 sm:px-6 sm:pb-6">
         <div className="flex flex-wrap gap-2">
           {game.skills.slice(0, 3).map((skill) => (
             <Badge key={skill} className="bg-white/75 text-[10px] text-muted-ink">
@@ -553,10 +603,10 @@ function PrintableCard({ printable }: { printable: Printable }) {
   const image = printableArtMap[printable.slug] ?? '/ai-assets/printable-worksheet.png'
 
   return (
-    <Card className={cn('h-full bg-gradient-to-br', toneMap[printable.tone])}>
-      <CardHeader className="gap-4">
+    <Card className={cn('h-full overflow-hidden bg-gradient-to-br transition hover:-translate-y-0.5 hover:shadow-[0_24px_70px_rgba(25,50,60,0.12)]', toneMap[printable.tone])}>
+      <CardHeader className="gap-3 p-4 sm:gap-4 sm:p-6">
         <div className="overflow-hidden rounded-[22px] border border-white/70 bg-white/70">
-          <img src={image} alt={`Thumbnail ilustrada da atividade ${printable.title}`} className="h-40 w-full object-cover" />
+          <img src={image} alt={`Thumbnail ilustrada da atividade ${printable.title}`} className="h-32 w-full object-cover sm:h-40" />
         </div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-wrap gap-2">
@@ -566,11 +616,11 @@ function PrintableCard({ printable }: { printable: Printable }) {
           <FavoriteButton active={favoriteSet.has(favoriteKey)} onClick={() => void toggleFavoriteAction('printable', printable.slug)} />
         </div>
         <div>
-          <CardTitle className="text-[1.45rem] leading-tight">{printable.title}</CardTitle>
+          <CardTitle className="text-[1.26rem] leading-tight sm:text-[1.45rem]">{printable.title}</CardTitle>
           <CardDescription className="mt-2">{printable.description}</CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-4 pb-4 sm:px-6 sm:pb-6">
         <div className="flex flex-wrap gap-2">
           {printable.materials.map((material) => (
             <Badge key={material} className="bg-white/75 text-[10px] text-muted-ink">
@@ -765,17 +815,17 @@ function HomePage() {
 
   return (
     <AppShell>
-      <section className="mx-auto flex max-w-7xl flex-col gap-10 px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pt-12">
-        <div className="grid gap-6 lg:grid-cols-[1.15fr,0.85fr]">
+      <section className="mx-auto flex max-w-7xl flex-col gap-8 px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:pt-10">
+        <div className="grid gap-5 lg:grid-cols-[1.15fr,0.85fr]">
           <Card className="overflow-hidden border-white/70 bg-gradient-to-br from-white via-sand to-[#f7fbff]">
-            <CardContent className="grid gap-10 px-6 pb-8 pt-8 sm:px-8 lg:grid-cols-[1fr,320px] lg:items-center">
+            <CardContent className="grid gap-6 px-5 pb-7 pt-7 sm:px-8 lg:grid-cols-[1fr,320px] lg:items-center">
               <div className="space-y-6">
                 <Badge className="bg-aqua/10 text-[11px] text-aqua">aprendizado + criatividade + impressao</Badge>
                 <div className="space-y-4">
-                  <h1 className="font-display text-5xl font-extrabold leading-[0.95] text-ink sm:text-6xl">
-                    Jogos, historias e atividades para aprender brincando.
+                  <h1 className="font-display text-4xl font-extrabold leading-[0.95] text-ink sm:text-6xl">
+                    Um parquinho digital para aprender brincando.
                   </h1>
-                  <p className="max-w-2xl text-lg leading-8 text-muted-ink">
+                  <p className="max-w-2xl text-base leading-7 text-muted-ink sm:text-lg sm:leading-8">
                     Uma plataforma infantil segura, divertida e intuitiva para criancas, pais e professores explorarem jogos online,
                     leitura guiada e folhas prontas para imprimir em A4.
                   </p>
@@ -804,11 +854,11 @@ function HomePage() {
                 </div>
               </div>
 
-              <div className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-[0_24px_50px_rgba(28,55,69,0.1)]">
+              <div className="rounded-[32px] border border-white/70 bg-white/90 p-4 shadow-[0_24px_50px_rgba(28,55,69,0.1)] sm:p-6">
                 <img
                   src="/ai-assets/hero-main.png"
                   alt="Ilustracao infantil com formas coloridas representando o universo LumiKids"
-                  className="w-full rounded-[28px] border border-soft-border object-cover"
+                  className="max-h-[300px] w-full rounded-[28px] border border-soft-border object-cover"
                 />
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   <div className="rounded-[24px] bg-white p-4 shadow-sm">
@@ -866,7 +916,7 @@ function HomePage() {
           </div>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
+        <section className="grid gap-5 lg:grid-cols-[1.2fr,0.8fr]">
           <Card className="overflow-hidden bg-ink text-white">
             <CardContent className="space-y-5 px-6 py-8 sm:px-8">
               <Badge className="border-white/20 bg-white/10 text-[11px] text-white">digital + papel</Badge>
@@ -975,6 +1025,171 @@ function InfoPanel({
   )
 }
 
+function getActivityTitle(progress: ProgressRecord, games: Game[], stories: Story[]) {
+  if (progress.itemKind === 'game') return games.find((game) => game.slug === progress.itemSlug)?.title ?? progress.itemSlug
+  return stories.find((story) => story.slug === progress.itemSlug)?.title ?? progress.itemSlug
+}
+
+function getFavoriteTitle(favorite: { itemKind: FavoriteKind; itemSlug: string }, games: Game[], stories: Story[], printables: Printable[]) {
+  if (favorite.itemKind === 'game') return games.find((game) => game.slug === favorite.itemSlug)?.title ?? favorite.itemSlug
+  if (favorite.itemKind === 'story') return stories.find((story) => story.slug === favorite.itemSlug)?.title ?? favorite.itemSlug
+  return printables.find((printable) => printable.slug === favorite.itemSlug)?.title ?? favorite.itemSlug
+}
+
+function formatActivityDate(value: string) {
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(value))
+}
+
+function GuardianDashboardPage() {
+  const { session, childActivity, games, stories, printables, loading } = useAppData()
+
+  if (loading) return <LoadingPage label="Organizando o painel da familia..." />
+  if (!session.user) return <Navigate to="/login" replace />
+  if (session.user.role !== 'guardian') return <Navigate to="/catalog" replace />
+
+  const progress = [...(childActivity?.progress ?? [])].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+  const favorites = childActivity?.favorites ?? []
+  const completedCount = progress.filter((entry) => entry.status === 'completed').length
+  const activeCount = progress.filter((entry) => entry.status !== 'completed').length
+  const bestScore = progress.reduce((max, entry) => Math.max(max, entry.bestScore ?? entry.score ?? 0), 0)
+  const latest = progress[0]
+  const childName = childActivity?.child?.name ?? 'Luna'
+  const nextGames = games.filter((game) => !progress.some((entry) => entry.itemKind === 'game' && entry.itemSlug === game.slug)).slice(0, 3)
+
+  return (
+    <AppShell>
+      <section className="mx-auto flex max-w-7xl flex-col gap-6 px-4 pb-12 pt-5 sm:px-6 lg:px-8 lg:pt-10">
+        <Card className="overflow-hidden border-white/80 bg-gradient-to-br from-ink via-[#234756] to-aqua text-white">
+          <CardContent className="grid gap-6 px-5 py-7 sm:px-8 lg:grid-cols-[1.1fr,0.9fr] lg:items-center">
+            <div className="space-y-5">
+              <Badge className="border-white/20 bg-white/10 text-[11px] text-white">painel do responsavel</Badge>
+              <div className="space-y-3">
+                <h1 className="font-display text-4xl font-extrabold leading-[0.95] text-white sm:text-6xl">
+                  Atividade da {childName}, sem complicar.
+                </h1>
+                <p className="max-w-2xl text-base leading-7 text-white/78 sm:text-lg">
+                  Um resumo visual para ver o que foi jogado, o que foi concluido e qual atividade vale continuar em familia.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <FamilyMetric icon={Medal} label="concluidas" value={String(completedCount)} />
+                <FamilyMetric icon={Activity} label="em andamento" value={String(activeCount)} />
+                <FamilyMetric icon={Trophy} label="melhor score" value={`${bestScore}%`} />
+              </div>
+            </div>
+            <div className="rounded-[34px] border border-white/15 bg-white/10 p-5 shadow-[0_28px_80px_rgba(0,0,0,0.18)]">
+              <div className="flex items-center gap-4 rounded-[28px] bg-white p-5 text-ink">
+                <span className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-sand text-4xl">{childActivity?.child?.avatar ?? '🦊'}</span>
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-muted-ink">crianca acompanhada</p>
+                  <p className="font-display text-3xl font-extrabold">{childName}</p>
+                  <p className="text-sm font-bold text-muted-ink">{childActivity?.child?.ageRange ?? '5-7 anos'}</p>
+                </div>
+              </div>
+              <div className="mt-4 rounded-[28px] bg-sun p-5 text-ink">
+                <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-ink/70">ultimo movimento</p>
+                <p className="mt-2 font-display text-2xl font-extrabold">
+                  {latest ? getActivityTitle(latest, games, stories) : 'Ainda sem atividade registrada'}
+                </p>
+                <p className="mt-1 text-sm font-bold text-ink/70">
+                  {latest ? `${latest.status === 'completed' ? 'Concluido' : 'Comecou'} em ${formatActivityDate(latest.updatedAt)}` : 'Entre com a conta infantil e jogue uma atividade para aparecer aqui.'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-6 lg:grid-cols-[1.08fr,0.92fr]">
+          <Card className="bg-white/95">
+            <CardHeader>
+              <CardTitle className="text-3xl">Linha do tempo da criança</CardTitle>
+              <CardDescription>Atividades recentes, progresso e pontuacao de um jeito rapido de entender.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {progress.length === 0 ? (
+                <EmptyState title="Nada por enquanto" description="Quando a crianca jogar ou ler, o progresso aparece aqui automaticamente." />
+              ) : (
+                progress.slice(0, 6).map((entry) => (
+                  <div key={`${entry.itemKind}:${entry.itemSlug}`} className="rounded-[26px] border border-soft-border bg-[#f7fbff] p-4 sm:p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex min-w-0 gap-3">
+                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] bg-white text-aqua shadow-sm">
+                          {entry.itemKind === 'game' ? <Gamepad2 className="h-5 w-5" /> : <BookOpen className="h-5 w-5" />}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="font-display text-xl font-extrabold leading-tight text-ink">{getActivityTitle(entry, games, stories)}</p>
+                          <p className="mt-1 text-sm font-bold text-muted-ink">{formatActivityDate(entry.updatedAt)}</p>
+                        </div>
+                      </div>
+                      <Badge className={cn('shrink-0 text-[10px]', entry.status === 'completed' ? 'bg-aqua text-white' : 'bg-sun text-ink')}>
+                        {entry.status === 'completed' ? 'feito' : 'em jogo'}
+                      </Badge>
+                    </div>
+                    <div className="mt-4 h-3 overflow-hidden rounded-full bg-white">
+                      <div className="h-full rounded-full bg-gradient-to-r from-coral to-aqua" style={{ width: `${Math.max(12, Math.min(100, entry.bestScore ?? entry.score ?? 0))}%` }} />
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-muted-ink">
+                      <span>{entry.bestScore ?? entry.score ?? 0}% score</span>
+                      <span>{entry.attemptCount ?? 0} tentativa(s)</span>
+                      <span>{entry.currentLevel && entry.maxLevel ? `nivel ${entry.currentLevel}/${entry.maxLevel}` : 'progresso salvo'}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="space-y-6">
+            <Card className="bg-sand">
+              <CardHeader>
+                <CardTitle className="text-2xl">Favoritos para retomar</CardTitle>
+                <CardDescription>O que a criança marcou para voltar depois.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {favorites.length === 0 ? (
+                  <p className="rounded-[22px] bg-white/75 p-4 text-sm font-bold text-muted-ink">Nenhum favorito ainda.</p>
+                ) : (
+                  favorites.slice(0, 5).map((favorite) => (
+                    <div key={`${favorite.itemKind}:${favorite.itemSlug}`} className="flex items-center justify-between gap-3 rounded-[22px] bg-white/85 px-4 py-3 text-sm font-extrabold text-ink shadow-sm">
+                      <span>{getFavoriteTitle(favorite, games, stories, printables)}</span>
+                      <Heart className="h-4 w-4 fill-coral text-coral" />
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/95">
+              <CardHeader>
+                <CardTitle className="text-2xl">Proximas boas escolhas</CardTitle>
+                <CardDescription>Atividades simples para continuar a trilha sem pressa.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {(nextGames.length > 0 ? nextGames : games.slice(0, 3)).map((game) => (
+                  <Link key={game.slug} to={`/games/${game.slug}`} className="group flex items-center justify-between gap-3 rounded-[22px] border border-soft-border bg-[#f7fbff] p-4 text-sm font-extrabold text-ink transition hover:border-aqua">
+                    <span>{game.title}</span>
+                    <ChevronRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                  </Link>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+    </AppShell>
+  )
+}
+
+function FamilyMetric({ icon: Icon, label, value }: { icon: typeof Medal; label: string; value: string }) {
+  return (
+    <div className="rounded-[24px] border border-white/15 bg-white/12 p-4 text-white">
+      <Icon className="h-5 w-5 text-sun" />
+      <p className="mt-4 font-display text-3xl font-extrabold leading-none">{value}</p>
+      <p className="mt-1 text-xs font-extrabold uppercase tracking-[0.16em] text-white/68">{label}</p>
+    </div>
+  )
+}
+
 function LoginPage() {
   const { session, loginAction } = useAppData()
   const navigate = useNavigate()
@@ -984,7 +1199,7 @@ function LoginPage() {
   const [submitting, setSubmitting] = useState(false)
 
   if (session.user) {
-    return <Navigate to="/catalog" replace />
+    return <Navigate to={session.user.role === 'guardian' ? '/guardian' : '/catalog'} replace />
   }
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -992,7 +1207,7 @@ function LoginPage() {
     setSubmitting(true)
     const ok = await loginAction({ email, password, role })
     setSubmitting(false)
-    if (ok) navigate('/catalog')
+    if (ok) navigate(role === 'guardian' ? '/guardian' : '/catalog')
   }
 
   const demoMap = {
@@ -1003,21 +1218,21 @@ function LoginPage() {
 
   return (
     <AppShell>
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-12 pt-8 sm:px-6 lg:grid-cols-[1.1fr,0.9fr] lg:px-8 lg:pt-12">
-        <Card className="overflow-hidden bg-ink text-white">
-          <CardContent className="space-y-6 px-6 py-8 sm:px-8">
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 pb-12 pt-5 sm:px-6 lg:grid-cols-[1.02fr,0.98fr] lg:px-8 lg:pt-10">
+        <Card className="overflow-hidden bg-gradient-to-br from-ink via-[#254958] to-aqua text-white">
+          <CardContent className="space-y-5 px-5 py-7 sm:px-8">
             <Badge className="border-white/15 bg-white/10 text-[11px] text-white">seguro + acolhedor + rapido</Badge>
-            <h1 className="font-display text-5xl font-extrabold leading-[0.95] text-white sm:text-6xl">
-              Entre no seu cantinho de descobertas.
+            <h1 className="font-display text-4xl font-extrabold leading-[0.95] text-white sm:text-6xl">
+              Entrar ficou simples para criança e responsável.
             </h1>
-            <p className="max-w-2xl text-lg leading-8 text-white/80">
-              Criancas encontram um ambiente claro e responsivo. Pais e professores acessam favoritos, historico e progresso sem complicacao.
+            <p className="max-w-2xl text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
+              O perfil infantil abre direto as atividades. O responsável entra em um painel bonito com progresso, favoritos e próximos passos.
             </p>
-            <div className="rounded-[32px] border border-white/10 bg-white/8 p-6">
+            <div className="rounded-[32px] border border-white/10 bg-white/8 p-4 sm:p-6">
               <img
                 src="/ai-assets/login-welcome.png"
                 alt="Ilustracao para area de login com mascote e cards de boas-vindas"
-                className="w-full rounded-[28px] border border-white/10 object-cover shadow-[0_20px_40px_rgba(0,0,0,0.16)]"
+                className="max-h-[360px] w-full rounded-[28px] border border-white/10 object-cover shadow-[0_20px_40px_rgba(0,0,0,0.16)]"
               />
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-[24px] bg-white/95 p-4 text-ink shadow-sm">
@@ -1034,16 +1249,16 @@ function LoginPage() {
         </Card>
 
         <Card className="bg-white/95">
-          <CardContent className="space-y-6 px-6 py-8 sm:px-8">
+          <CardContent className="space-y-5 px-5 py-7 sm:px-8">
             <div className="space-y-2">
-              <p className="font-display text-4xl font-extrabold text-ink">Entrar</p>
-              <p className="text-sm leading-6 text-muted-ink">Use uma conta demo segura para testar o fluxo completo da plataforma.</p>
+              <p className="font-display text-3xl font-extrabold text-ink sm:text-4xl">Escolha seu perfil</p>
+              <p className="text-sm leading-6 text-muted-ink">As contas demo ja vêm preenchidas para testar tudo agora.</p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
               {([
-                { key: 'child', title: 'Perfil infantil', body: 'Avatar, medalhas e continuidade rapida.' },
-                { key: 'guardian', title: 'Responsavel', body: 'Favoritos, historico e filtros por idade.' },
+                { key: 'child', title: 'Crianca', body: 'Jogar, ler e ganhar medalhas.' },
+                { key: 'guardian', title: 'Responsavel', body: 'Ver atividade e proximos passos.' },
               ] as const).map((item) => (
                 <button
                   key={item.key}
@@ -1054,8 +1269,8 @@ function LoginPage() {
                     setPassword(demoMap[item.key].password)
                   }}
                   className={cn(
-                    'rounded-[24px] border p-4 text-left transition',
-                    role === item.key ? 'border-coral bg-sand shadow-sm' : 'border-soft-border bg-[#f7fbff] hover:border-sky/50',
+                    'rounded-[24px] border p-4 text-left transition active:scale-[0.99]',
+                    role === item.key ? 'border-coral bg-sand shadow-sm ring-2 ring-coral/15' : 'border-soft-border bg-[#f7fbff] hover:border-sky/50',
                   )}
                 >
                   <p className="font-display text-xl font-extrabold text-ink">{item.title}</p>
@@ -1154,12 +1369,12 @@ function CatalogPage() {
 
   return (
     <AppShell>
-      <section className="mx-auto flex max-w-7xl flex-col gap-8 px-4 pb-12 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+      <section className="mx-auto flex max-w-7xl flex-col gap-6 px-4 pb-12 pt-5 sm:px-6 lg:px-8 lg:pt-10">
         <div className="grid gap-5 lg:grid-cols-[1.2fr,300px]">
           <Card className="bg-white/95">
             <CardContent className="space-y-4 px-6 py-7 sm:px-8">
               <Badge className="bg-aqua/10 text-[11px] text-aqua">catalogo clicavel</Badge>
-              <h1 className="font-display text-5xl font-extrabold text-ink">Escolha um mundo para brincar agora</h1>
+              <h1 className="font-display text-3xl font-extrabold leading-tight text-ink sm:text-5xl">Escolha um mundo para brincar agora</h1>
               <p className="max-w-3xl text-base leading-7 text-muted-ink">
                 Cards grandes, icones claros e descricoes curtas ajudam a crianca a descobrir atividades rapidamente, sem menus confusos.
               </p>
@@ -1242,7 +1457,7 @@ function GamesPage() {
 
   return (
     <AppShell>
-      <section className="mx-auto flex max-w-7xl flex-col gap-8 px-4 pb-12 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+      <section className="mx-auto flex max-w-7xl flex-col gap-6 px-4 pb-12 pt-5 sm:px-6 lg:px-8 lg:pt-10">
         <SectionTitle
           eyebrow="jogar online"
           title="Mini games educativos com instrucoes simples"
@@ -1261,7 +1476,9 @@ function GamesPage() {
 function GameDetailPage() {
   const { slug } = useParams()
   const { games, progressMap, recordProgressAction, loading } = useAppData()
+  const [difficultyState, setDifficultyState] = useState<{ slug?: string; value: GameDifficulty }>({ value: 'easy' })
   const game = games.find((entry) => entry.slug === slug)
+  const difficulty = difficultyState.slug === slug ? difficultyState.value : 'easy'
   const gameSlug = game?.slug
   const gameImage = game ? gameArtMap[game.slug] ?? '/ai-assets/game-tictactoe.png' : '/ai-assets/game-tictactoe.png'
   const progress = game ? progressMap.get(`game:${game.slug}`) : undefined
@@ -1284,9 +1501,9 @@ function GameDetailPage() {
       currentPhase: progressPhase ?? 'opened',
       currentLevel: progressLevel ?? 1,
       maxLevel: progressMaxLevel ?? 1,
-      meta: { source: 'detail-page' },
+      meta: { source: 'detail-page', difficulty },
     })
-  }, [gameSlug, progressBestScore, progressLevel, progressMaxLevel, progressPhase, progressStatus, recordProgressAction])
+  }, [difficulty, gameSlug, progressBestScore, progressLevel, progressMaxLevel, progressPhase, progressStatus, recordProgressAction])
 
   const handleGameProgress = (payload: {
     status: ProgressRecord['status']
@@ -1300,7 +1517,7 @@ function GameDetailPage() {
   }) => {
     if (!gameSlug) return
 
-    void recordProgressAction({ itemKind: 'game', itemSlug: gameSlug, ...payload })
+    void recordProgressAction({ itemKind: 'game', itemSlug: gameSlug, ...payload, meta: { ...(payload.meta ?? {}), difficulty } })
   }
 
   if (loading) {
@@ -1319,12 +1536,12 @@ function GameDetailPage() {
 
   const complete = (score: number) => {
     toast.success(`Muito bem! ${game.reward}`)
-    void recordProgressAction({ itemKind: 'game', itemSlug: game.slug, status: 'completed', score, currentPhase: 'game-complete', currentLevel: progress?.maxLevel ?? progress?.currentLevel ?? 1, maxLevel: progress?.maxLevel ?? progress?.currentLevel ?? 1, successDelta: 1 })
+    void recordProgressAction({ itemKind: 'game', itemSlug: game.slug, status: 'completed', score, currentPhase: 'game-complete', currentLevel: progress?.maxLevel ?? progress?.currentLevel ?? 1, maxLevel: progress?.maxLevel ?? progress?.currentLevel ?? 1, successDelta: 1, meta: { difficulty } })
   }
 
   return (
     <AppShell>
-      <section className="mx-auto flex max-w-7xl flex-col gap-8 px-4 pb-12 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+      <section className="mx-auto flex max-w-7xl flex-col gap-6 px-4 pb-12 pt-5 sm:px-6 lg:px-8 lg:pt-10">
         <Card className={cn('bg-gradient-to-br', toneMap[game.coverTone])}>
           <CardContent className="grid gap-6 px-6 py-8 sm:px-8 lg:grid-cols-[1.02fr,0.98fr] lg:items-center">
             <div className="space-y-4">
@@ -1333,7 +1550,7 @@ function GameDetailPage() {
                 <Badge className="bg-white/75 text-[11px] text-muted-ink">{game.difficulty}</Badge>
                 <Badge className="bg-white/75 text-[11px] text-muted-ink">online + A4</Badge>
               </div>
-              <h1 className="font-display text-5xl font-extrabold text-ink">{game.title}</h1>
+              <h1 className="font-display text-4xl font-extrabold leading-tight text-ink sm:text-5xl">{game.title}</h1>
               <p className="max-w-2xl text-base leading-7 text-muted-ink">{game.description}</p>
               <div className="flex flex-wrap gap-2">
                 {game.skills.map((skill) => (
@@ -1366,16 +1583,42 @@ function GameDetailPage() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 lg:grid-cols-[1.05fr,0.95fr]">
+        <div className="grid gap-5 lg:grid-cols-[1.05fr,0.95fr]">
           <div className="no-print space-y-4">
             <div className="rounded-[24px] bg-white/85 p-5 shadow-sm">
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-aqua">modo online</p>
               <p className="mt-2 text-sm leading-6 text-muted-ink">Aqui a crianca toca, testa, recebe feedback imediato e pode reiniciar quantas vezes quiser.</p>
             </div>
-            {game.engine === 'tic-tac-toe' && <TicTacToeGame onComplete={complete} onProgress={handleGameProgress} />}
-            {game.engine === 'memory' && <MemoryGame onComplete={complete} onProgress={handleGameProgress} />}
-            {game.engine === 'sequence' && <SequenceGame onComplete={complete} onProgress={handleGameProgress} />}
-            {game.engine === 'worksheet' && <WorksheetGame slug={game.slug as 'caca-palavras-da-fazenda' | 'labirinto-do-foguete' | 'ligue-os-pontos-do-dragao'} onComplete={complete} onProgress={handleGameProgress} />}
+
+            <Card className="overflow-hidden border-white/80 bg-white/95">
+              <CardContent className="space-y-4 p-5">
+                <div>
+                  <p className="font-display text-2xl font-extrabold text-ink">Escolha a dificuldade</p>
+                  <p className="mt-1 text-sm leading-6 text-muted-ink">No celular continua simples de tocar. No computador aparecem atalhos para jogar com teclado.</p>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {gameDifficultyOptions.map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => setDifficultyState({ slug, value: option.key })}
+                      className={cn(
+                        'rounded-[22px] border p-4 text-left transition active:scale-[0.99]',
+                        difficulty === option.key ? 'border-coral bg-sand shadow-sm ring-2 ring-coral/15' : 'border-soft-border bg-[#f7fbff] hover:border-aqua/60',
+                      )}
+                    >
+                      <span className="font-display text-xl font-extrabold text-ink">{option.label}</span>
+                      <span className="mt-2 block text-xs font-bold leading-5 text-muted-ink">{option.body}</span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {game.engine === 'tic-tac-toe' && <TicTacToeGame key={`${game.slug}-${difficulty}`} difficulty={difficulty} onComplete={complete} onProgress={handleGameProgress} />}
+            {game.engine === 'memory' && <MemoryGame key={`${game.slug}-${difficulty}`} difficulty={difficulty} onComplete={complete} onProgress={handleGameProgress} />}
+            {game.engine === 'sequence' && <SequenceGame key={`${game.slug}-${difficulty}`} difficulty={difficulty} onComplete={complete} onProgress={handleGameProgress} />}
+            {game.engine === 'worksheet' && <WorksheetGame key={`${game.slug}-${difficulty}`} difficulty={difficulty} slug={game.slug as 'caca-palavras-da-fazenda' | 'labirinto-do-foguete' | 'ligue-os-pontos-do-dragao'} onComplete={complete} onProgress={handleGameProgress} />}
           </div>
 
           <Card className="bg-white/95 print-card">
@@ -1419,7 +1662,7 @@ function StoriesPage() {
 
   return (
     <AppShell>
-      <section className="mx-auto flex max-w-7xl flex-col gap-8 px-4 pb-12 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+      <section className="mx-auto flex max-w-7xl flex-col gap-6 px-4 pb-12 pt-5 sm:px-6 lg:px-8 lg:pt-10">
         <div className="grid gap-6 lg:grid-cols-[1.05fr,0.95fr] lg:items-center">
           <SectionTitle
             eyebrow="ler no site ou imprimir"
@@ -1475,7 +1718,7 @@ function StoryDetailPage() {
 
   return (
     <AppShell>
-      <section className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pb-12 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+      <section className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-12 pt-5 sm:px-6 lg:px-8 lg:pt-10">
         <Card className={cn('bg-gradient-to-br', toneMap[story.coverTone])}>
           <CardContent className="grid gap-6 px-6 py-8 sm:px-8 lg:grid-cols-[1.02fr,0.98fr] lg:items-center">
             <div className="space-y-4">
@@ -1484,7 +1727,7 @@ function StoryDetailPage() {
                 <Badge className="bg-white/75 text-[11px] text-muted-ink">{story.readTime}</Badge>
                 <Badge className="bg-white/75 text-[11px] text-muted-ink">{story.audio ? 'audio sugerido' : 'leitura tranquila'}</Badge>
               </div>
-              <h1 className="font-display text-5xl font-extrabold text-ink">{story.title}</h1>
+              <h1 className="font-display text-4xl font-extrabold leading-tight text-ink sm:text-5xl">{story.title}</h1>
               <p className="text-lg leading-8 text-muted-ink">{story.blurb}</p>
               <div className="flex flex-wrap gap-2">
                 {story.tags.map((tag) => (
@@ -1570,7 +1813,7 @@ function PrintablesPage() {
 
   return (
     <AppShell>
-      <section className="mx-auto flex max-w-7xl flex-col gap-8 px-4 pb-12 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+      <section className="mx-auto flex max-w-7xl flex-col gap-6 px-4 pb-12 pt-5 sm:px-6 lg:px-8 lg:pt-10">
         <SectionTitle
           eyebrow="modo impressao"
           title="Conteudos planejados para folha A4"
@@ -1604,6 +1847,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/guardian" element={<GuardianDashboardPage />} />
       <Route path="/catalog" element={<CatalogPage />} />
       <Route path="/games" element={<GamesPage />} />
       <Route path="/games/:slug" element={<GameDetailPage />} />

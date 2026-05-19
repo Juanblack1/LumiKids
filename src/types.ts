@@ -40,6 +40,12 @@ export interface SessionPayload {
   csrfToken?: string
 }
 
+export interface ChildActivityPayload {
+  child: SessionUser | null
+  favorites: FavoriteRecord[]
+  progress: ProgressRecord[]
+}
+
 export interface CatalogCategory {
   slug: string
   title: string

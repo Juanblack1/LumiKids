@@ -1,5 +1,6 @@
 import type {
   CatalogCategory,
+  ChildActivityPayload,
   FavoriteKind,
   Game,
   Printable,
@@ -86,6 +87,10 @@ export function getGames() {
 
 export function getPrintables() {
   return request<{ printables: Printable[] }>('/api/printables')
+}
+
+export function getChildActivity() {
+  return request<ChildActivityPayload>('/api/guardian/child-activity')
 }
 
 export function toggleFavorite(input: { itemKind: FavoriteKind; itemSlug: string }) {

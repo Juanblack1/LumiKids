@@ -19,8 +19,9 @@
 :root {
   color: var(--color-ink);
   background:
-    radial-gradient(circle at top left, rgba(255, 209, 102, 0.45), transparent 24%),
-    radial-gradient(circle at top right, rgba(90, 182, 255, 0.18), transparent 22%),
+    radial-gradient(circle at 8% 10%, rgba(255, 209, 102, 0.42), transparent 24%),
+    radial-gradient(circle at 92% 6%, rgba(90, 182, 255, 0.24), transparent 22%),
+    radial-gradient(circle at 70% 42%, rgba(51, 199, 192, 0.13), transparent 24%),
     linear-gradient(180deg, #fff9f1 0%, #f7fbff 46%, #ffffff 100%);
   font-family: var(--font-body);
   font-synthesis: none;
@@ -52,6 +53,7 @@ a {
 
 button {
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 ::selection {
@@ -59,19 +61,28 @@ button {
 }
 
 .story-grid {
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .catalog-grid {
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 }
 
 .game-grid {
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
 }
 
 .printable-grid {
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+@media (max-width: 520px) {
+  .story-grid,
+  .catalog-grid,
+  .game-grid,
+  .printable-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media print {
