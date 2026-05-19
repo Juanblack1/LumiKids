@@ -1,5 +1,9 @@
 # LumiKids
 
+<p align="center">
+  <img src="assets/cover.png" alt="LumiKids cover" width="100%" />
+</p>
+
 LumiKids e uma plataforma infantil em React/Vite com jogos educativos, historias, imprimiveis, favoritos e acompanhamento de progresso. O frontend roda separado da API para facilitar deploy, manutencao e testes.
 
 ## URLs oficiais
